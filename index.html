@@ -817,7 +817,7 @@
                 <input type="checkbox" id="check-wochenenden" onchange="aktualisiereTerminVorschau()"> Wochenenden warnen/auslassen
             </label>
             <label style="display: block; cursor: pointer;">
-                <input type="checkbox" id="check-feiertage" onchange="aktualisiereTerminVorschau()"> Feiertage (NRW) warnen/auslassen
+                <input type="checkbox" id="check-feiertage" onchange="aktualisiereTerminVorschau()"> Feiertage warnen/auslassen
             </label>
         </div>
 
@@ -1156,7 +1156,7 @@
         let arrModus = ["Einzelprojekt", "Multiprojekt"]; // Array zur Auswahl des Modus
         let strAktuellerModus = "Multiprojekt"; // Der aktuell gewählte Modus
         let bolOhneWochenenden = true; // Sollen Wochenenden ignoriert werden?
-        let bolOhneFeiertage = true; // Sollen NRW-Feiertage ignoriert werden?
+        let bolOhneFeiertage = true; // Sollen Feiertage ignoriert werden?
         let bolEntscheidungenImmerMitschicken = false; // Historische Entscheidungen immer anhängen?
         let strWiederholung = "wöchentlich"; // Gewähltes Intervall
         let intWiederholungTage = 7; // Anzahl der Tage zwischen Besprechungen
@@ -3041,7 +3041,7 @@
             infoText += "--------------------------------------------------------\n";
             infoText += `Copyright (c) ${jahr} ${autor}\n\n`;
             infoText += "Die Software wird ohne Mängelgewähr bereitgestellt. Die Autoren oder Urheberrechtshinhaber haften nicht für Ansprüche, Schäden oder sonstige Verbindlichkeiten, die aus der Nutzung der Software entstehen.\n\n";
-            infoText += "Die Erlaubnis zur Nutzung, zum Kopieren und zur Modifikation wird hiermit unter der Bedingung erteilt, dass der obige Copyright-Hinweis in allen Kopien oder wesentlichen Teilen der Software enthalten bleibt.";
+            infoText += "Die Erlaubnis zur Nutzung, zum Kopieren und zur Modifikation wird hiermit unter der Bedingung erteilt, dass der obige Copyright-Hinweis in allen Kopien oder wesentlichen Teilen der Software enthalten bleibt (MIT License).";
 
             // Zeigt den Text als Browser-Meldung an
             alert(infoText);
