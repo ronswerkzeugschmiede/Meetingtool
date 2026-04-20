@@ -5233,7 +5233,7 @@
 
             // Fußzeile
             pdfHTML += `<p style="margin-top: 30px; font-size: 9pt; color: #555; text-align: center;">`;
-            pdfHTML += `Nächste Besprechung: <b>${strNaechstesDatum}</b> | Besprechungsprotokoll-Tool v${strDateiversion}</p></div>`;
+            pdfHTML += `Nächste Besprechung: <b>${strNaechstesDatum}</b> | <a href="https://ronswerkzeugschmiede.github.io/Meetingtool/" style="text-decoration: none; color: inherit;">Meetingtool</a> v${strDateiversion}</p></div>`;
 
             // 3. Den HTML-Code in den unsichtbaren Container schieben
             document.getElementById('print-bereich').innerHTML = pdfHTML;
