@@ -37,7 +37,7 @@ Das Tool ist in vier logische Phasen unterteilt, die den Nutzer intuitiv durch d
  Technologie-Stack: Pures HTML5, CSS3 und Vanilla JavaScript. Keine externen Abhängigkeiten oder Frameworks (kein React/Angular), was die Langzeit-Kompatibilität sichert.
  Datenspeicherung (IndexedDB): Alle Daten werden verschlüsselt in der lokalen Datenbank deines Browsers gespeichert. Es verlassen zu keinem Zeitpunkt Daten dein lokales System.
 
-### ⚖️ Lizenz & Rechtliches
+### Lizenz & Rechtliches
 Dieses Projekt steht unter der MIT-Lizenz. Das bedeutet: Du darfst es frei verwenden, modifizieren und teilen, solange der ursprüngliche Copyright-Hinweis erhalten bleibt. Die Nutzung erfolgt auf eigene Gefahr (siehe Info-Dialog im Tool).
 
 Das freut mich! Hier ist das nächste Kapitel für deine README, das den Fokus auf die praktische Inbetriebnahme und die logischen Abläufe legt.
