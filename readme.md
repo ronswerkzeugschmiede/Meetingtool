@@ -37,11 +37,6 @@ Das Tool ist in vier logische Phasen unterteilt, die den Nutzer intuitiv durch d
  Technologie-Stack: Pures HTML5, CSS3 und Vanilla JavaScript. Keine externen Abhängigkeiten oder Frameworks (kein React/Angular), was die Langzeit-Kompatibilität sichert.
  Datenspeicherung (IndexedDB): Alle Daten werden verschlüsselt in der lokalen Datenbank deines Browsers gespeichert. Es verlassen zu keinem Zeitpunkt Daten dein lokales System.
 
-### Lizenz & Rechtliches
-Dieses Projekt steht unter der MIT-Lizenz. Das bedeutet: Du darfst es frei verwenden, modifizieren und teilen, solange der ursprüngliche Copyright-Hinweis erhalten bleibt. Die Nutzung erfolgt auf eigene Gefahr (siehe Info-Dialog im Tool).
-
-Das freut mich! Hier ist das nächste Kapitel für deine README, das den Fokus auf die praktische Inbetriebnahme und die logischen Abläufe legt.
-
 ---
 ## Schnellstart
 
@@ -81,8 +76,6 @@ Hier verwaltest du das "Personal" deiner Besprechungen.
  Stille Mitleser: Personen, die nicht anwesend sind, aber das Protokoll automatisiert erhalten sollen.
  Namenszusätze: In den Einstellungen kannst du wählen, ob hinter dem Namen die Firma oder die Funktion in Klammern angezeigt werden soll.
 
-Hier ist der Entwurf für das vierte Kapitel, das die Schnittstelle zwischen deiner lokalen Datenbank und der Außenwelt (E-Mail, Teams, Archiv) beschreibt.
-
 ---
 ## Automatisierung & Export
 
@@ -99,19 +92,6 @@ Die Kommunikation wird durch ein Template-System gesteuert. Du kannst eigene Vor
  `{Aufgaben}`: Tabellarische oder listenförmige Aufbereitung der To-dos.
  `{Feedback}`: Erzeugt dynamische Mailto-Links, mit denen Teilnehmer mit einem Klick strukturiertes Feedback an den Moderator senden können.
  `{Ablageort}`: Verlinkt automatisch auf den im System hinterlegten Netzwerkpfad oder Cloud-Ordner.
-
----
-## Konfiguration & Personalisierung
-
-### System-Einstellungen
-In diesem Bereich passt du das Tool an deine Arbeitsweise an:
- Rhythmus & Fristen: Definiere, nach wie vielen Tagen Aufgaben archiviert werden sollen und wie weit in die Zukunft die automatische Terminberechnung greifen soll.
- Corporate Identity: Hinterlege dein Firmenlogo (als Base64-String) und den Organisationsnamen für alle Exporte.
-
-### Design-Modi (Dark Mode)
-Um die Augen bei langen Meetings zu schonen, verfügt das Tool über einen intelligenten Dark Mode. Dieser kann manuell umgeschaltet werden oder passt sich (je nach Browsereinstellung) automatisch an die Systemeinstellungen deines Betriebssystems an.
-
-Hier ist das abschließende Kapitel zur Sicherheit und Technik, gefolgt von den Hinweisen für Entwickler. Damit ist deine README komplett und bereit für den Einsatz!
 
 ---
 ## Datenschutz & Sicherheit
@@ -144,4 +124,4 @@ Die Keyword-Erkennung in der Texteingabe reagiert aktuell auf folgende Begriffe 
 
 Dieses Projekt ist unter der MIT-Lizenz lizenziert.
 
-Die Software wird "wie besehen" (as is) zur Verfügung gestellt, ohne jegliche ausdrückliche oder stillschweigende Gewährleistung. In keinem Fall sind die Autoren oder Urheberrechtshinhaber für Ansprüche, Schäden oder andere Haftungen haftbar, die sich aus der Software oder der Nutzung der Software ergeben.
+Du darfst es frei verwenden, modifizieren und teilen, solange der ursprüngliche Copyright-Hinweis erhalten bleibt. Die Nutzung erfolgt auf eigene Gefahr (siehe Info-Dialog im Tool).
