@@ -142,6 +142,59 @@
             background-color: #0d2b4d !important; /* Dunkles Marineblau */
         }
 
+        /* Spezifische Korrekturen für die Analytics-Karten im Darkmode */
+        /* Standard-Karten (weiß) */
+        .dark-mode div[style*="background: #fff"], 
+        .dark-mode div[style*="background: white"] {
+            background-color: #2a2a2a !important;
+            color: #e0e0e0 !important;
+        }
+
+        /* Kern-Team (hellgrün -> dunkelgrün) */
+        .dark-mode div[style*="background: #f0fff4"] {
+            background-color: #1a3a2a !important;
+            border-color: #2f855a !important;
+            color: #9ae6b4 !important;
+        }
+        .dark-mode div[style*="background: #f0fff4"] div { color: #9ae6b4 !important; }
+
+        /* Ghosting & Fazit (hellrot -> dunkelrot) */
+        .dark-mode div[style*="background: #fff5f5"],
+        .dark-mode div[style*="background: #fdf2f2"],
+        .dark-mode #stat-fazit {
+            background-color: #4a1a1a !important;
+            border-color: #c53030 !important;
+            color: #feb2b2 !important;
+        }
+
+        /* Effizienz (hellblau -> dunkelblau) */
+        .dark-mode div[style*="background: #ebf8ff"] {
+            background-color: #1a2a3a !important;
+            border-color: #2b6cb0 !important;
+            color: #90cdf4 !important;
+        }
+
+        /* Aufgaben-König (lila) */
+        .dark-mode div[style*="background: #faf5ff"] {
+            background-color: #2d1a3a !important;
+            border-color: #6b46c1 !important;
+            color: #d6bcfa !important;
+        }
+
+        /* Mix & Liegezeit (orange) */
+        .dark-mode div[style*="background: #fffaf0"] {
+            background-color: #3d2b1f !important;
+            border-color: #c05621 !important;
+            color: #fbd38d !important;
+        }
+
+        /* Erledigungs-Quote (grau) */
+        .dark-mode div[style*="background: #f7fafc"] {
+            background-color: #2d3748 !important;
+            border-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+
         /* ========================================== */
         /* Optische Hinweise zu Pausen                */
         /* ========================================== */
@@ -604,37 +657,37 @@
                         Start: <span id="stat-smiley-start">?</span> | Ende: <span id="stat-smiley-ende">?</span>
                     </div>
                 </div>
-                <div style="flex: 1; background: #f0fff4; border: 1px solid #c6f6d5; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #c6f6d5; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #2f855a; text-transform: uppercase;">🏆 Kern-Team</div>
                     <div id="stat-kernteam" style="font-weight: bold; font-size: 0.9em; color: #22543d;">-</div>
                 </div>
-                <div style="flex: 1; background: #fff5f5; border: 1px solid #fed7d7; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #fed7d7; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #c53030; text-transform: uppercase;">👻 Ghosting</div>
                     <div id="stat-ghosting" style="font-weight: bold; font-size: 0.9em; color: #742a2a;">-</div>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
-                <div style="flex: 1; background: #ebf8ff; border: 1px solid #bee3f8; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #bee3f8; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #2b6cb0; text-transform: uppercase;">📊 Effizienz</div>
                     <div id="stat-effizienz" style="font-weight: bold; font-size: 0.9em; color: #2c5282;">-</div>
                 </div>
-                <div style="flex: 1; background: #faf5ff; border: 1px solid #e9d8fd; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #e9d8fd; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #6b46c1; text-transform: uppercase;">🔨 Aufgaben-König</div>
                     <div id="stat-aufgabe-top" style="font-weight: bold; font-size: 0.9em; color: #44337a;">-</div>
                 </div>
-                <div style="flex: 1; background: #fffaf0; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">💡 Mix (I/A/E)</div>
                     <div id="stat-mix" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
-                <div style="flex: 1; background: #fffaf0; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">⏱ Erledigungs-Dauer</div>
                     <div id="stat-liegezeit" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
                 </div>
-                <div style="flex: 1; background: #f7fafc; border: 1px solid #edf2f7; padding: 8px; border-radius: 6px; text-align: center;">
+                <div style="flex: 1; background: #fff; border: 1px solid #edf2f7; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #4a5568; text-transform: uppercase;">✅ Erledigungs-Quote</div>
                     <div id="stat-quote" style="font-weight: bold; font-size: 0.9em; color: #2d3748;">-</div>
                 </div>
@@ -3015,15 +3068,15 @@
                 let fazitElement = document.getElementById('stat-fazit');
                 if (lStats.quote > 80) {
                     fazitElement.innerText = "🚀 Extrem produktiv!";
-                    fazitElement.style.background = "#f0fff4"; 
+                    fazitElement.style.background = "#fff"; 
                     fazitElement.style.color = "#22543d";
                 } else if (lStats.quote < 40) {
                     fazitElement.innerText = "⚠️ Aufgaben-Stau!";
-                    fazitElement.style.background = "#fff5f5";
+                    fazitElement.style.background = "#fff";
                     fazitElement.style.color = "#9b2c2c";
                 } else {
                     fazitElement.innerText = "⚖️ Stabiler Workflow";
-                    fazitElement.style.background = "#fffaf0";
+                    fazitElement.style.background = "#fff";
                     fazitElement.style.color = "#7b341e";
                 }
             }
