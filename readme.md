@@ -93,6 +93,7 @@ Die Kommunikation wird durch ein Template-System gesteuert. Du kannst eigene Vor
  `{Feedback}`: Erzeugt dynamische Mailto-Links, mit denen Teilnehmer mit einem Klick strukturiertes Feedback an den Moderator senden können.
  `{Ablageort}`: Verlinkt automatisch auf den im System hinterlegten Netzwerkpfad oder Cloud-Ordner.
 
+
 ---
 ## Datenschutz & Sicherheit
 

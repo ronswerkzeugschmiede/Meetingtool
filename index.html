@@ -589,19 +589,65 @@
 
     <div id="view-historie-anwesenheit" class="ansicht">
         <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
-                    <h2 style="margin: 0;">Anwesenheits-Historie</h2>
-                    <div id="historie-statistik" style="background: #eef2f5; padding: 5px 15px; border-radius: 6px; border: 1px solid #ced4da; font-weight: bold; color: #0056b3; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                        Gesamtdauer: <span id="summe-dauer">0</span>
+            
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Anwesenheits-Historie & Analytics</h2>
+                <div id="historie-statistik-main" style="background: #eef2f5; padding: 5px 12px; border-radius: 6px; border: 1px solid #ced4da; font-weight: bold; color: #0056b3; font-size: 0.9em;">
+                    Gesamtdauer: <span id="summe-dauer">0</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
+                <div style="flex: 1; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="font-size: 0.7em; color: #666; text-transform: uppercase;">Termintreue (Soll/Ist)</div>
+                    <div style="font-size: 1em;">
+                        Start: <span id="stat-smiley-start">?</span> | Ende: <span id="stat-smiley-ende">?</span>
                     </div>
                 </div>
-                
-                <p style="margin: 0; font-size: 0.9em; color: #666; text-align: center; max-width: 800px;">
-                    Hier siehst du, wer bei welcher Besprechung anwesend war. Falls du das Protokoll nachträglich verschickst, 
-                    greift das Tool auf diese Daten zurück. Du kannst Namen und Zeiten hier auch manuell anpassen 
-                    (Namen bitte durch Komma getrennt eintragen).
-                </p>            
+                <div style="flex: 1; background: #f0fff4; border: 1px solid #c6f6d5; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #2f855a; text-transform: uppercase;">🏆 Kern-Team</div>
+                    <div id="stat-kernteam" style="font-weight: bold; font-size: 0.9em; color: #22543d;">-</div>
+                </div>
+                <div style="flex: 1; background: #fff5f5; border: 1px solid #fed7d7; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #c53030; text-transform: uppercase;">👻 Ghosting</div>
+                    <div id="stat-ghosting" style="font-weight: bold; font-size: 0.9em; color: #742a2a;">-</div>
+                </div>
             </div>
+
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
+                <div style="flex: 1; background: #ebf8ff; border: 1px solid #bee3f8; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #2b6cb0; text-transform: uppercase;">📊 Effizienz</div>
+                    <div id="stat-effizienz" style="font-weight: bold; font-size: 0.9em; color: #2c5282;">-</div>
+                </div>
+                <div style="flex: 1; background: #faf5ff; border: 1px solid #e9d8fd; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #6b46c1; text-transform: uppercase;">🔨 Aufgaben-König</div>
+                    <div id="stat-aufgabe-top" style="font-weight: bold; font-size: 0.9em; color: #44337a;">-</div>
+                </div>
+                <div style="flex: 1; background: #fffaf0; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">💡 Mix (I/A/E)</div>
+                    <div id="stat-mix" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
+                <div style="flex: 1; background: #fffaf0; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">⏱ Erledigungs-Dauer</div>
+                    <div id="stat-liegezeit" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
+                </div>
+                <div style="flex: 1; background: #f7fafc; border: 1px solid #edf2f7; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #4a5568; text-transform: uppercase;">✅ Erledigungs-Quote</div>
+                    <div id="stat-quote" style="font-weight: bold; font-size: 0.9em; color: #2d3748;">-</div>
+                </div>
+                <div id="stat-fazit" style="flex: 1; background: #fdf2f2; border: 1px solid #fbd3d3; padding: 8px; border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.85em; font-weight: bold; color: #9b2c2c;">
+                    Lädt...
+                </div>
+            </div>
+            
+            <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #777; text-align: center; max-width: 850px;">
+                Hier siehst du, wer bei welcher Besprechung anwesend war. Falls du das Protokoll nachträglich verschickst, greift das Tool auf diese Daten zurück. Du kannst Namen und Zeiten hier auch manuell anpassen (Namen durch Komma getrennt eintragen).
+            </p>
+        </div>
+
         <div style="overflow-x: auto; background: white; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 15px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">
                 <thead style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
@@ -619,21 +665,10 @@
         </div>
 
         <div style="display: flex; gap: 10px;">
-            <button onclick="speichereHistorieUI()" style="background: #28a745; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px;">Speichern</button>
+            <button onclick="speichereHistorieUI()" style="background: #28a745; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px; font-weight: bold;">Speichern & Zurück</button>
             <button onclick="wechsleAnsicht('view-startmenue')" style="background: #6c757d; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px;">Abbrechen</button>
         </div>
-    </div>
-
-    <div id="view-historie-anwesenheit" class="ansicht">
-        <h2>Anwesenheits-Historie</h2>
-        <p>Hier siehst du, wer bei welcher Besprechung anwesend war. Falls du das Protokoll nachträglich verschickst, greift das Tool auf diese Daten zurück. Du kannst Namen hier auch manuell anpassen (Namen durch Komma getrennt eintragen).</p>
-        
-        <div id="liste-historie-ui" style="margin-bottom: 20px;">
-            </div>
-
-        <button onclick="speichereHistorieUI()" style="background: #28a745; color: white; border: none;">Speichern & Zurück</button>
-        <button onclick="wechsleAnsicht('view-startmenue')">Abbrechen</button>
-    </div>
+    </div>   
 
     <div id="view-projekte" class="ansicht">
         <h2>Projektverwaltung</h2>
@@ -1213,7 +1248,9 @@
         let bolAutoJson = false;
         let bolAutoAsk = false;
 
-        
+        // Globale Variablen für den isolierten Modus
+        let bolIsolierterModus = false;
+        let intGeparkterPunktNr = null; // NEU: Merkt sich, wo die Besprechung gerade stand!
 
 
         // ==========================================
@@ -1241,6 +1278,7 @@
         // ==========================================
         let arrListeAktiveTeilnehmer = []; // Alle aktiven Teilnehmer (zum Abhaken)
         let arrAnwesende = []; // Tatsächlich anwesende Teilnehmer der aktuellen Sitzung
+        let arrAbwesende = []; // Speichert die Namen der Fehlenden für den Mail-Verteiler
         let arrListeProtokollanten = []; // Aktive Teilnehmer für das Dropdown "Protokollführer"
         let strNameProtokollant = ""; // Ausgewählter Protokollführer
         let arrNaechsteTermine = []; // Speichert die nächsten 6 Termine (Format: YYYY-MM-DD)
@@ -1269,6 +1307,7 @@
         let arrProjekte = [
             { strKurzbezeichnung: "PRJ01", strBeschreibung: "Neubau Halle", bolAktiv: true }
         ];
+        let strVorherigeAnsichtProjekte = "view-startmenue"; // Merkt sich, woher wir kamen
 
         // Array aller Teilnehmer (Stammdaten)
         let arrListeTeilnehmer = [
@@ -1300,11 +1339,44 @@
         ];
 
         // ==========================================
+        // SMART-TYPING: Variablen für Tastatursteuerung
+        // ==========================================
+        let intAktuellerFokusIndex = -1;      // Merkt sich, welcher Button gerade markiert ist
+        let arrAktuellePopupButtons = [];     // Speichert alle Buttons des aktuell offenen Menüs
+        let strAktiverPopupModus = "";        // Merkt sich, ob wir "Einzeln" (++) oder "Gruppe" (++++) einfügen wollen
+
+        // ==========================================
+        // Globale Variablen für die Hashtag-Suche
+        // ==========================================
+        let strAktiverHashtag = "";
+        let strAnsichtVorHashtag = "view-liste"; 
+
+        // ==========================================
         // VARIABLEN (Datenbank)
         // ==========================================
         let db; // Speichert die aktive Datenbankverbindung
         const strDbName = "ProtokollToolDB";
-        const intDbVersion = 1;
+        const intDbVersion = 1;        
+
+        // ==========================================
+        // VARIABLEN TEXT-VORLAGEN
+        // ==========================================
+        let strTplEinladung = "Hallo zusammen,\n\nhiermit lade ich euch zu unserer nächsten Besprechung \"{Titel}\" ein.\n\nDatum: {Datum}\nZeit: {Startzeit} - {Endzeit} Uhr\nOrt: {Ort}\n\n{Agenda}\n\nBitte gebt kurz Bescheid, falls ihr nicht teilnehmen könnt.\n\nViele Grüße";
+        
+        let strTplErinnerung = "Hallo {Empfaenger},\n\nhier ist eine kurze Erinnerung an deine offenen Aufgaben aus unserer Besprechung \"{Titel}\":\n\n{Aufgaben}\n\nBitte gib mir ein kurzes Update oder hake die Punkte im nächsten Termin ab. Danke dir!\n\nViele Grüße";
+        
+        let strTplProtokoll = "Hallo zusammen,\n\nhier ist das aktuelle Protokoll unserer Serie \"{Titel}\" vom {Datum}, {Startzeit} - {Endzeit} Uhr.\n\n{Protokoll}\n\nBitte um Rückmeldung, wenn etwas geändert oder ergänzt werden soll.\nDie nächste Besprechung findet am {NaechstesDatum} statt.\n\nViele Grüße";
+        
+        // Merkt sich, in welches Feld man zuletzt geklickt hat (für die Platzhalter-Buttons)
+        let letztesFeldVorlagen = "input-tpl-einladung";
+
+        //Referenz 
+        let intReferenzLengenAbzug = 0; // Merkt sich, ob wir 3, 4 oder 5 Zeichen (inkl. Leerzeichen) löschen müssen
+        let strReferenzTyp = "";
+
+        //Agenda
+        let bolSidebarOffen = true;
+
 
         // ==========================================
         // FUNKTIONEN: UI & Navigation
@@ -1356,19 +1428,7 @@
                 btnHome.style.display = (ansichtId === 'view-startmenue') ? 'none' : 'block';
             }
         }
-
-        // ==========================================
-        // VARIABLEN TEXT-VORLAGEN
-        // ==========================================
-        let strTplEinladung = "Hallo zusammen,\n\nhiermit lade ich euch zu unserer nächsten Besprechung \"{Titel}\" ein.\n\nDatum: {Datum}\nZeit: {Startzeit} - {Endzeit} Uhr\nOrt: {Ort}\n\n{Agenda}\n\nBitte gebt kurz Bescheid, falls ihr nicht teilnehmen könnt.\n\nViele Grüße";
         
-        let strTplErinnerung = "Hallo {Empfaenger},\n\nhier ist eine kurze Erinnerung an deine offenen Aufgaben aus unserer Besprechung \"{Titel}\":\n\n{Aufgaben}\n\nBitte gib mir ein kurzes Update oder hake die Punkte im nächsten Termin ab. Danke dir!\n\nViele Grüße";
-        
-        let strTplProtokoll = "Hallo zusammen,\n\nhier ist das aktuelle Protokoll unserer Serie \"{Titel}\" vom {Datum}, {Startzeit} - {Endzeit} Uhr.\n\n{Protokoll}\n\nBitte um Rückmeldung, wenn etwas geändert oder ergänzt werden soll.\nDie nächste Besprechung findet am {NaechstesDatum} statt.\n\nViele Grüße";
-        
-        // Merkt sich, in welches Feld man zuletzt geklickt hat (für die Platzhalter-Buttons)
-        let letztesFeldVorlagen = "input-tpl-einladung";
-
         // ==========================================
         // FUNKTIONEN: Einstellungen & Vorschau
         // ==========================================
@@ -1677,10 +1737,6 @@
             }
         }
 
-        // Globale Variablen für den isolierten Modus
-        let bolIsolierterModus = false;
-        let intGeparkterPunktNr = null; // NEU: Merkt sich, wo die Besprechung gerade stand!
-
         function isoliertBearbeiten(nummer) {
             bolIsolierterModus = true;
             
@@ -1779,13 +1835,6 @@
                 }
             }
         }
-
-        // ==========================================
-        // SMART-TYPING: Variablen für Tastatursteuerung
-        // ==========================================
-        let intAktuellerFokusIndex = -1;      // Merkt sich, welcher Button gerade markiert ist
-        let arrAktuellePopupButtons = [];     // Speichert alle Buttons des aktuell offenen Menüs
-        let strAktiverPopupModus = "";        // Merkt sich, ob wir "Einzeln" (++) oder "Gruppe" (++++) einfügen wollen
 
         // ==========================================
         // SMART-TYPING: Textfeld-Überwachung (Schritt 1)
@@ -1900,9 +1949,6 @@
         // ==========================================
         // FUNKTIONEN: Referenz-Picker (Querverweise)
         // ==========================================
-
-        let intReferenzLengenAbzug = 0; // Merkt sich, ob wir 3, 4 oder 5 Zeichen (inkl. Leerzeichen) löschen müssen
-        let strReferenzTyp = "";
 
         function oeffneReferenzPicker(typ, abzug) {
             strReferenzTyp = typ;
@@ -2419,8 +2465,6 @@
         // FUNKTION: Agenda-Sidebar
         // ==========================================
 
-        let bolSidebarOffen = true;
-
         function toggleSidebar() {
             bolSidebarOffen = !bolSidebarOffen;
             const sidebar = document.getElementById('sidebar-live-agenda');
@@ -2449,12 +2493,6 @@
             // versehentlich der ganze Besprechungspunkt in der Sidebar angeklickt wird!
             return text.replace(regex, '<span class="hashtag-pill" onclick="sucheNachHashtag(\'$1\'); event.stopPropagation();">#$1</span>');
         }
-
-        // ==========================================
-        // Globale Variablen für die Hashtag-Suche
-        // ==========================================
-        let strAktiverHashtag = "";
-        let strAnsichtVorHashtag = "view-liste"; 
 
         function sucheNachHashtag(suchTag) {
             
@@ -2807,33 +2845,199 @@
         // FUNKTIONEN: Anwesenheits-Historie
         // ==========================================
 
+        function berechneLiegezeitStatistik() {
+            let erledigteAufgaben = arrProtokollDaten.filter(p => p.strTyp === "Aufgabe" && p.datErledigungsdatum);
+            
+            if (erledigteAufgaben.length === 0) return { avgTage: "-", quote: 0 };
+
+            let gesamtTage = 0;
+
+            erledigteAufgaben.forEach(punkt => {
+                // Startdatum aus der Historie finden (basierend auf der Hunderter-Nummer des Punktes)
+                let besprNrHunderter = Math.floor(punkt.intBesprechungspunktnummer / 100) * 100;
+                let ursprungsTermin = arrAnwesenheitsHistorie.find(h => Math.floor(h.intBesprNr / 100) * 100 === besprNrHunderter);
+                
+                let startDatum = ursprungsTermin ? new Date(ursprungsTermin.strDatum) : new Date(punkt.datErfassungsdatum);
+                let erledigtDatum = new Date(punkt.datErledigungsdatum);
+                
+                // Differenz in Tagen
+                let diffZeit = erledigtDatum - startDatum;
+                let diffTage = Math.ceil(diffZeit / (1000 * 60 * 60 * 24));
+                if (diffTage < 0) diffTage = 0; // Falls am selben Tag erledigt
+                
+                gesamtTage += diffTage;
+            });
+
+            let offeneAufgaben = arrProtokollDaten.filter(p => p.strTyp === "Aufgabe" && !p.datErledigungsdatum).length;
+            let quote = Math.round((erledigteAufgaben.length / (erledigteAufgaben.length + offeneAufgaben)) * 100);
+
+            return {
+                avgTage: (gesamtTage / erledigteAufgaben.length).toFixed(1),
+                quote: quote
+            };
+        }
+        
+        function berechneTeilnehmerStatistik() {
+            if (arrAnwesenheitsHistorie.length === 0) return [];
+
+            let stats = {}; // Speicher für: { "Name": { anwesend: 0, abwesend: 0, gesamt: 0 } }
+
+            arrAnwesenheitsHistorie.forEach(besprechung => {
+                // 1. Anwesende zählen
+                besprechung.arrAnwesende.forEach(name => {
+                    if (!stats[name]) stats[name] = { anwesend: 0, abwesend: 0, gesamt: 0 };
+                    stats[name].anwesend++;
+                    stats[name].gesamt++;
+                });
+
+                // 2. Abwesende zählen (Verteiler)
+                besprechung.arrAbwesende.forEach(name => {
+                    if (!stats[name]) stats[name] = { anwesend: 0, abwesend: 0, gesamt: 0 };
+                    stats[name].abwesend++;
+                    stats[name].gesamt++;
+                });
+            });
+
+            // In ein sortierbares Array umwandeln
+            let teilnehmerListe = Object.keys(stats).map(name => {
+                let person = stats[name];
+                let quote = Math.round((person.anwesend / person.gesamt) * 100);
+                return {
+                    name: name,
+                    anwesend: person.anwesend,
+                    abwesend: person.abwesend,
+                    gesamt: person.gesamt,
+                    quote: quote
+                };
+            });
+
+            // Sortieren nach Quote (Kern-Team oben, "Ghosting" unten)
+            return teilnehmerListe.sort((a, b) => b.quote - a.quote);
+        }
+
+        function berechneInhaltsStatistik() {
+            if (arrProtokollDaten.length === 0) return null;
+
+            let gesamtPunkte = arrProtokollDaten.length;
+            let aufgabenZaehler = {}; // { "Name": Anzahl }
+            let typZaehler = { "Info": 0, "Aufgabe": 0, "Entscheidung": 0, "Agenda": 0 };
+
+            arrProtokollDaten.forEach(punkt => {
+                // Typen zählen
+                if (typZaehler[punkt.strTyp] !== undefined) {
+                    typZaehler[punkt.strTyp]++;
+                }
+
+                // Aufgaben-Horter finden (nur bei Typ Aufgabe)
+                if (punkt.strTyp === "Aufgabe" && punkt.strName) {
+                    let name = punkt.strName.trim();
+                    if (name) {
+                        aufgabenZaehler[name] = (aufgabenZaehler[name] || 0) + 1;
+                    }
+                }
+            });
+
+            // Wer hat die meisten Aufgaben?
+            let topHorter = Object.keys(aufgabenZaehler).map(name => ({
+                name: name,
+                anzahl: aufgabenZaehler[name]
+            })).sort((a, b) => b.anzahl - a.anzahl);
+
+            // Durchschnittliche Punkte pro Meeting berechnen
+            let anzahlMeetings = arrAnwesenheitsHistorie.length || 1;
+            let gesamtMinuten = arrAnwesenheitsHistorie.reduce((sum, h) => sum + parseInt(h.intGesamtdauerOhnePause || 0), 0);
+
+            return {
+                punkteProMeeting: (gesamtPunkte / anzahlMeetings).toFixed(1),
+                minutenProPunkt: gesamtMinuten > 0 ? (gesamtMinuten / gesamtPunkte).toFixed(1) : 0,
+                aufgabeTop: topHorter.length > 0 ? topHorter[0] : { name: "-", anzahl: 0 },
+                verteilung: typZaehler
+            };
+        }
+
         function oeffneAnwesenheitsHistorie() {
             const container = document.getElementById('liste-historie-ui');
             const summenAnzeige = document.getElementById('summe-dauer');
+            const smileyStartAnzeige = document.getElementById('stat-smiley-start');
+            const smileyEndeAnzeige = document.getElementById('stat-smiley-ende');
+            const kernAnzeige = document.getElementById('stat-kernteam');
+            const ghostAnzeige = document.getElementById('stat-ghosting');
+            
             container.innerHTML = "";
             let gesamtMinuten = 0;
 
             if (arrAnwesenheitsHistorie.length === 0) {
-                container.innerHTML = `<tr><td colspan="6" style="padding: 10px; text-align: center;">Keine Daten.</td></tr>`;
-                summenAnzeige.innerText = "0";
+                container.innerHTML = `<tr><td colspan="6" style="padding: 10px; text-align: center;">Noch keine Daten vorhanden.</td></tr>`;
                 wechsleAnsicht('view-historie-anwesenheit');
                 return;
             }
 
-            // Dubletten-Bereinigung (Sicherheitshalber)
+            // 1. Zeit-Statistik berechnen & anzeigen
+            const zStats = berechneZeitStatistik();
+            if (zStats) {
+                smileyStartAnzeige.innerHTML = `${holeSmiley(zStats.avgStartDiff)} <small>${zStats.quoteStart}%</small>`;
+                smileyEndeAnzeige.innerHTML = `${holeSmiley(zStats.avgEndDiff)} <small>${zStats.quoteEnde}%</small>`;
+            }
+
+            // 2. Teilnehmer-Statistik berechnen & anzeigen
+            const tStats = berechneTeilnehmerStatistik();
+            if (tStats.length > 0) {
+                // Kern-Team (Top 2)
+                kernAnzeige.innerText = tStats.slice(0, 2).map(p => p.name).join(", ");
+                
+                // Ghosting (Leute unter 50% Quote, sortiert nach schlechtester Quote)
+                const ghosts = tStats.filter(p => p.quote < 50).sort((a,b) => a.quote - b.quote);
+                ghostAnzeige.innerText = ghosts.length > 0 ? ghosts.slice(0, 2).map(p => p.name).join(", ") : "Niemand :)";
+            }
+
+            // 3. Inhalts-Statistik berechnen & anzeigen
+            const iStats = berechneInhaltsStatistik();
+            if (iStats) {
+                // Effizienz: x Punkte pro Meeting / y Min pro Punkt
+                document.getElementById('stat-effizienz').innerText = `${iStats.punkteProMeeting} Pkt. (Ø ${iStats.minutenProPunkt} Min)`;
+                
+                // Aufgaben-König
+                document.getElementById('stat-aufgabe-top').innerText = `${iStats.aufgabeTop.name} (${iStats.aufgabeTop.anzahl})`;
+                
+                // Mix: Info / Aufgabe / Entscheidung
+                const m = iStats.verteilung;
+                document.getElementById('stat-mix').innerText = `${m.Info} / ${m.Aufgabe} / ${m.Entscheidung}`;
+                document.getElementById('stat-mix').title = `Info: ${m.Info}, Aufgaben: ${m.Aufgabe}, Entscheidungen: ${m.Entscheidung}`;
+            }
+
+            // 4. Liegezeit-Statistik berechnen & anzeigen
+            const lStats = berechneLiegezeitStatistik();
+            if (lStats) {
+                document.getElementById('stat-liegezeit').innerText = `${lStats.avgTage} Tage (Ø)`;
+                document.getElementById('stat-quote').innerText = `${lStats.quote}% erledigt`;
+                
+                // Ein kleines dynamisches Fazit
+                let fazitElement = document.getElementById('stat-fazit');
+                if (lStats.quote > 80) {
+                    fazitElement.innerText = "🚀 Extrem produktiv!";
+                    fazitElement.style.background = "#f0fff4"; 
+                    fazitElement.style.color = "#22543d";
+                } else if (lStats.quote < 40) {
+                    fazitElement.innerText = "⚠️ Aufgaben-Stau!";
+                    fazitElement.style.background = "#fff5f5";
+                    fazitElement.style.color = "#9b2c2c";
+                } else {
+                    fazitElement.innerText = "⚖️ Stabiler Workflow";
+                    fazitElement.style.background = "#fffaf0";
+                    fazitElement.style.color = "#7b341e";
+                }
+            }
+
+            // 3. Tabelle zeichnen (mit Dubletten-Check)
             let uniqueMap = {};
             arrAnwesenheitsHistorie.forEach(item => { uniqueMap[item.intBesprNr] = item; });
             arrAnwesenheitsHistorie = Object.values(uniqueMap);
-
             let sortierteHistorie = [...arrAnwesenheitsHistorie].sort((a, b) => b.intBesprNr - a.intBesprNr);
 
             sortierteHistorie.forEach((eintrag) => {
                 let nr = Math.floor(eintrag.intBesprNr / 100);
-                
-                // Summe berechnen
                 gesamtMinuten += parseInt(eintrag.intGesamtdauerOhnePause || 0);
 
-                // Datum konvertieren
                 let anzeigeDatum = eintrag.strDatum;
                 if (anzeigeDatum && anzeigeDatum.includes("-")) {
                     const [j, m, t] = anzeigeDatum.split("-");
@@ -2842,48 +3046,36 @@
 
                 let tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid #eee";
-
                 tr.innerHTML = `
                     <td style="padding: 4px 10px; font-weight: bold;">${nr}</td>
                     <td style="padding: 4px 10px;">${anzeigeDatum}</td>
-                    <td style="padding: 4px 10px;">
-                        <input type="time" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; padding: 2px; font-size: 0.9em;">
-                    </td>
-                    <td style="padding: 4px 10px;">
-                        <input type="time" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; padding: 2px; font-size: 0.9em;">
-                    </td>
-                    <td style="padding: 4px 10px;">
-                        <input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 45px; border: 1px solid #ddd; padding: 2px; font-size: 0.9em;">
-                    </td>
+                    <td style="padding: 4px 10px;"><input type="time" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
+                    <td style="padding: 4px 10px;"><input type="time" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
+                    <td style="padding: 4px 10px;"><input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 45px; border: 1px solid #ddd; font-size: 0.9em;"></td>
                     <td style="padding: 4px 10px;">
                         <div style="display: flex; align-items: center; gap: 5px;">
-                            <span style="color: green; font-weight: bold; min-width: 20px;">A:</span>
-                            <input type="text" id="hist-anwesend-${eintrag.intBesprNr}" value="${eintrag.arrAnwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.85em;">
-                            <span style="color: #dc3545; font-weight: bold; min-width: 20px; margin-left: 5px;">V:</span>
-                            <input type="text" id="hist-abwesend-${eintrag.intBesprNr}" value="${eintrag.arrAbwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.85em;">
+                            <span style="color: green; font-weight: bold;">A:</span>
+                            <input type="text" id="hist-anwesend-${eintrag.intBesprNr}" value="${eintrag.arrAnwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.8em;">
+                            <span style="color: #dc3545; font-weight: bold; margin-left: 5px;">V:</span>
+                            <input type="text" id="hist-abwesend-${eintrag.intBesprNr}" value="${eintrag.arrAbwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.8em;">
                         </div>
                     </td>
                 `;
                 container.appendChild(tr);
             });
 
-            // Summe anzeigen (in Stunden umrechnen falls gewünscht, hier aber in Minuten)
+            // 4. Gesamtdauer formatieren
             let anzeigeText = gesamtMinuten + " Min.";
-
-            if (gesamtMinuten >= 60) {
-                let stunden = Math.round(gesamtMinuten / 60 * 10) / 10;
-                anzeigeText += ` / ${stunden} Std.`;
-            }
-
-            // Ab 8 Stunden (einem Arbeitstag) zeigen wir auch Tage an
-            if (gesamtMinuten >= 480) {
-                let arbeitstage = (gesamtMinuten / 480).toFixed(1);
-                anzeigeText += ` (~${arbeitstage} Personentage)`;
-            }
-
+            if (gesamtMinuten >= 60) anzeigeText += ` / ${(gesamtMinuten / 60).toFixed(1)} Std.`;
+            if (gesamtMinuten >= 480) anzeigeText += ` (~${(gesamtMinuten / 480).toFixed(1)} PT)`;
             summenAnzeige.innerText = anzeigeText;
+
             wechsleAnsicht('view-historie-anwesenheit');
         }
+        
+        
+
+        
        
         function speichereHistorieUI() {
             arrAnwesenheitsHistorie.forEach((eintrag) => {
@@ -3581,21 +3773,9 @@
             });
         }
 
-        function kopiereErinnerungsText(name, aufgabenListe) {
-            let fertigerText = bereiteErinnerungsTextVor(name, aufgabenListe);
-            
-            navigator.clipboard.writeText(fertigerText).then(() => {
-                alert(`✅ Der Erinnerungstext für ${name} wurde in die Zwischenablage kopiert!`);
-            }).catch(err => {
-                alert("Kopieren fehlgeschlagen.");
-            });
-        }
-
         // ==========================================
         // FUNKTIONEN: Projektverwaltung
         // ==========================================
-
-        let strVorherigeAnsichtProjekte = "view-startmenue"; // Merkt sich, woher wir kamen
 
         function oeffneProjekte() {
             strVorherigeAnsichtProjekte = "view-startmenue";
@@ -4914,8 +5094,6 @@
         // FUNKTIONEN: Export & Protokollerstellung
         // ==========================================
 
-        let arrAbwesende = []; // Speichert die Namen der Fehlenden für den Mail-Verteiler
-
         // Liest die Checkboxen aus und speichert, wer da ist
         function speichereAnwesenheit() {
             arrAnwesende = [];
@@ -5977,6 +6155,62 @@
         }
 
 
+        // ==========================================
+        // FUNKTIONEN: Statistik
+        // ==========================================
+
+        // Wandelt "08:30" in 510 Minuten um
+        function zeitZuMinuten(strZeit) {
+            if (!strZeit || !strZeit.includes(":")) return 0;
+            const [stunden, minuten] = strZeit.split(":").map(Number);
+            return stunden * 60 + minuten;
+        }
+
+        // Berechnet die Statistik für die Zeit-Disziplin
+        function berechneZeitStatistik() {
+            if (arrAnwesenheitsHistorie.length === 0) return null;
+
+            let gesamtVerspaetungStart = 0;
+            let gesamtUeberziehungEnde = 0;
+            let puenktlicheStarts = 0;
+            let puenktlicheEnden = 0;
+            const toleranz = 15; // Deine gewünschte Toleranz in Minuten
+
+            const sollStartMin = zeitZuMinuten(strGeplanteStartzeit);
+            const sollEndeMin = zeitZuMinuten(strGeplanteEndzeit);
+
+            arrAnwesenheitsHistorie.forEach(eintrag => {
+                const istStartMin = zeitZuMinuten(eintrag.datIstStartZeit);
+                const istEndeMin = zeitZuMinuten(eintrag.datIstEndeZeit);
+
+                // Start-Treue
+                const diffStart = istStartMin - sollStartMin;
+                gesamtVerspaetungStart += diffStart;
+                if (diffStart <= toleranz) puenktlicheStarts++;
+
+                // End-Treue
+                const diffEnde = istEndeMin - sollEndeMin;
+                gesamtUeberziehungEnde += diffEnde;
+                if (diffEnde <= toleranz) puenktlicheEnden++;
+            });
+
+            const anzahl = arrAnwesenheitsHistorie.length;
+            
+            return {
+                avgStartDiff: Math.round(gesamtVerspaetungStart / anzahl),
+                avgEndDiff: Math.round(gesamtUeberziehungEnde / anzahl),
+                quoteStart: Math.round((puenktlicheStarts / anzahl) * 100),
+                quoteEnde: Math.round((puenktlicheEnden / anzahl) * 100)
+            };
+        }
+
+        // Gibt den passenden Smiley basierend auf der Differenz zurück
+        function holeSmiley(differenz) {
+            if (differenz <= 0) return "😇";     // Überpünktlich / Früher fertig
+            if (differenz <= 5) return "😊";     // Fast pünktlich
+            if (differenz <= 15) return "😐";    // Akzeptabel
+            return "😫";                         // Deutlich drüber
+        }
 
         // ==========================================
         // FUNKTIONEN: IndexedDB Datenbank
