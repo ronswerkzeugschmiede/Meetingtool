@@ -588,6 +588,43 @@
     </div>
 
     <div id="view-historie-anwesenheit" class="ansicht">
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
+                    <h2 style="margin: 0;">Anwesenheits-Historie</h2>
+                    <div id="historie-statistik" style="background: #eef2f5; padding: 5px 15px; border-radius: 6px; border: 1px solid #ced4da; font-weight: bold; color: #0056b3; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        Gesamtdauer: <span id="summe-dauer">0</span>
+                    </div>
+                </div>
+                
+                <p style="margin: 0; font-size: 0.9em; color: #666; text-align: center; max-width: 800px;">
+                    Hier siehst du, wer bei welcher Besprechung anwesend war. Falls du das Protokoll nachträglich verschickst, 
+                    greift das Tool auf diese Daten zurück. Du kannst Namen und Zeiten hier auch manuell anpassen 
+                    (Namen bitte durch Komma getrennt eintragen).
+                </p>            
+            </div>
+        <div style="overflow-x: auto; background: white; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 15px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">
+                <thead style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                    <tr>
+                        <th style="padding: 5px 10px; text-align: left; width: 40px;">Nr.</th>
+                        <th style="padding: 5px 10px; text-align: left; width: 90px;">Datum</th>
+                        <th style="padding: 5px 10px; text-align: left; width: 80px;">Start</th>
+                        <th style="padding: 5px 10px; text-align: left; width: 80px;">Ende</th>
+                        <th style="padding: 5px 10px; text-align: left; width: 70px;">Dauer</th>
+                        <th style="padding: 5px 10px; text-align: left;">Teilnehmer (Kompakt)</th>
+                    </tr>
+                </thead>
+                <tbody id="liste-historie-ui"></tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button onclick="speichereHistorieUI()" style="background: #28a745; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px;">Speichern</button>
+            <button onclick="wechsleAnsicht('view-startmenue')" style="background: #6c757d; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px;">Abbrechen</button>
+        </div>
+    </div>
+
+    <div id="view-historie-anwesenheit" class="ansicht">
         <h2>Anwesenheits-Historie</h2>
         <p>Hier siehst du, wer bei welcher Besprechung anwesend war. Falls du das Protokoll nachträglich verschickst, greift das Tool auf diese Daten zurück. Du kannst Namen hier auch manuell anpassen (Namen durch Komma getrennt eintragen).</p>
         
@@ -2772,51 +2809,111 @@
 
         function oeffneAnwesenheitsHistorie() {
             const container = document.getElementById('liste-historie-ui');
+            const summenAnzeige = document.getElementById('summe-dauer');
             container.innerHTML = "";
+            let gesamtMinuten = 0;
 
             if (arrAnwesenheitsHistorie.length === 0) {
-                container.innerHTML = `<div style="padding: 10px; background: #eef2f5;">Es gibt noch keine gespeicherten Anwesenheiten.</div>`;
+                container.innerHTML = `<tr><td colspan="6" style="padding: 10px; text-align: center;">Keine Daten.</td></tr>`;
+                summenAnzeige.innerText = "0";
+                wechsleAnsicht('view-historie-anwesenheit');
+                return;
             }
 
-            // Wir sortieren absteigend, damit die neueste Besprechung oben steht
+            // Dubletten-Bereinigung (Sicherheitshalber)
+            let uniqueMap = {};
+            arrAnwesenheitsHistorie.forEach(item => { uniqueMap[item.intBesprNr] = item; });
+            arrAnwesenheitsHistorie = Object.values(uniqueMap);
+
             let sortierteHistorie = [...arrAnwesenheitsHistorie].sort((a, b) => b.intBesprNr - a.intBesprNr);
 
             sortierteHistorie.forEach((eintrag) => {
                 let nr = Math.floor(eintrag.intBesprNr / 100);
                 
-                let div = document.createElement('div');
-                div.style.background = "#f9f9f9";
-                div.style.border = "1px solid #ccc";
-                div.style.padding = "10px";
-                div.style.marginBottom = "10px";
-                div.style.borderRadius = "4px";
+                // Summe berechnen
+                gesamtMinuten += parseInt(eintrag.intGesamtdauerOhnePause || 0);
 
-                div.innerHTML = `
-                    <h4 style="margin: 0 0 10px 0; color: #0056b3;">Serie Nr. ${nr} <span style="color: gray; font-size: 0.8em; font-weight: normal;">(vom ${eintrag.strDatum})</span></h4>
-                    <label style="font-size: 0.9em; font-weight: bold;">Anwesend:</label>
-                    <input type="text" id="hist-anwesend-${eintrag.intBesprNr}" value="${eintrag.arrAnwesende.join(', ')}" style="margin-bottom: 10px;">
-                    <label style="font-size: 0.9em; font-weight: bold;">Abwesend (Verteiler):</label>
-                    <input type="text" id="hist-abwesend-${eintrag.intBesprNr}" value="${eintrag.arrAbwesende.join(', ')}" style="margin-bottom: 0;">
+                // Datum konvertieren
+                let anzeigeDatum = eintrag.strDatum;
+                if (anzeigeDatum && anzeigeDatum.includes("-")) {
+                    const [j, m, t] = anzeigeDatum.split("-");
+                    anzeigeDatum = `${t}.${m}.${j}`;
+                }
+
+                let tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid #eee";
+
+                tr.innerHTML = `
+                    <td style="padding: 4px 10px; font-weight: bold;">${nr}</td>
+                    <td style="padding: 4px 10px;">${anzeigeDatum}</td>
+                    <td style="padding: 4px 10px;">
+                        <input type="time" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; padding: 2px; font-size: 0.9em;">
+                    </td>
+                    <td style="padding: 4px 10px;">
+                        <input type="time" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; padding: 2px; font-size: 0.9em;">
+                    </td>
+                    <td style="padding: 4px 10px;">
+                        <input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 45px; border: 1px solid #ddd; padding: 2px; font-size: 0.9em;">
+                    </td>
+                    <td style="padding: 4px 10px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="color: green; font-weight: bold; min-width: 20px;">A:</span>
+                            <input type="text" id="hist-anwesend-${eintrag.intBesprNr}" value="${eintrag.arrAnwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.85em;">
+                            <span style="color: #dc3545; font-weight: bold; min-width: 20px; margin-left: 5px;">V:</span>
+                            <input type="text" id="hist-abwesend-${eintrag.intBesprNr}" value="${eintrag.arrAbwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.85em;">
+                        </div>
+                    </td>
                 `;
-                container.appendChild(div);
+                container.appendChild(tr);
             });
 
-            wechsleAnsicht('view-historie-anwesenheit');
-        }        
+            // Summe anzeigen (in Stunden umrechnen falls gewünscht, hier aber in Minuten)
+            let anzeigeText = gesamtMinuten + " Min.";
 
+            if (gesamtMinuten >= 60) {
+                let stunden = Math.round(gesamtMinuten / 60 * 10) / 10;
+                anzeigeText += ` / ${stunden} Std.`;
+            }
+
+            // Ab 8 Stunden (einem Arbeitstag) zeigen wir auch Tage an
+            if (gesamtMinuten >= 480) {
+                let arbeitstage = (gesamtMinuten / 480).toFixed(1);
+                anzeigeText += ` (~${arbeitstage} Personentage)`;
+            }
+
+            summenAnzeige.innerText = anzeigeText;
+            wechsleAnsicht('view-historie-anwesenheit');
+        }
+       
         function speichereHistorieUI() {
             arrAnwesenheitsHistorie.forEach((eintrag) => {
                 let anwInput = document.getElementById(`hist-anwesend-${eintrag.intBesprNr}`);
                 let abwInput = document.getElementById(`hist-abwesend-${eintrag.intBesprNr}`);
                 
+                // Zeit-Inputs auslesen
+                let startInput = document.getElementById(`hist-start-${eintrag.intBesprNr}`);
+                let endeInput = document.getElementById(`hist-ende-${eintrag.intBesprNr}`);
+                let dauerInput = document.getElementById(`hist-dauer-${eintrag.intBesprNr}`);
+                
                 if (anwInput && abwInput) {
-                    // Wandelt den Text wieder sauber in ein Array um (Kommas als Trenner)
                     eintrag.arrAnwesende = anwInput.value.split(',').map(s => s.trim()).filter(s => s !== "");
                     eintrag.arrAbwesende = abwInput.value.split(',').map(s => s.trim()).filter(s => s !== "");
                 }
+
+                // Zeitwerte im Objekt aktualisieren
+                if (startInput) eintrag.datIstStartZeit = startInput.value;
+                if (endeInput) eintrag.datIstEndeZeit = endeInput.value;
+                if (dauerInput) eintrag.intGesamtdauerOhnePause = parseInt(dauerInput.value) || 0;
             });
+
             speichereDatenInDB();
+            alert("Historie erfolgreich aktualisiert.");
             wechsleAnsicht('view-startmenue');
+        }
+
+        function updateHistorie(index, feld, wert) {
+            arrAnwesenheitsHistorie[index][feld] = wert;
+            speichereDatenInDB(); // Sofort lokal sichern
         }
 
         function importiereCSV(event) {
@@ -4662,65 +4759,118 @@
                 container.appendChild(label);
             });
         }
-
+        
         function beendeBesprechung() {
-            // 1. NEU: Agenda-Prüfung
-            let offeneAgendaPunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true && p.strTyp === "Agenda");
+            // 1. Die Hunderter-Basis der aktuellen Besprechung ermitteln (z.B. 5900)
+            let hunderterBasis = Math.floor(intAktBesprNr / 100) * 100;
             
-            if (offeneAgendaPunkte.length > 0) {
-                // Wir bauen die Nachricht dynamisch zusammen
-                let msg = `Achtung: Es gibt noch ${offeneAgendaPunkte.length} unbearbeitete(n) Punkt(e) mit dem Typ "Agenda":\n\n`;
+            // 2. Alle Punkte der aktuellen Besprechung filtern und ABSTEIGEND sortieren
+            // (z.B. 5903, 5902, 5901)
+            let punkteDieserBesprechung = arrProtokollDaten
+                .filter(p => p.intBesprechungspunktnummer > hunderterBasis && p.intBesprechungspunktnummer < hunderterBasis + 100)
+                .sort((a, b) => b.intBesprechungspunktnummer - a.intBesprechungspunktnummer);
+
+            // 3. Einzelschritte-Prüfung per Schleife
+            for (let i = 0; i < punkteDieserBesprechung.length; i++) {
+                let punkt = punkteDieserBesprechung[i];
+                let nrFormatiert = formatierePunktNummer(punkt.intBesprechungspunktnummer);
                 
-                // Alle offenen Punkte hübsch auflisten
-                offeneAgendaPunkte.forEach(punkt => {
-                    let nr = formatierePunktNummer(punkt.intBesprechungspunktnummer);
-                    let beschr = punkt.strBeschreibung ? punkt.strBeschreibung.replace(/\n/g, ' ') : "Keine Beschreibung"; 
-                    if (beschr.length > 65) beschr = beschr.substring(0, 65) + "...";
-                    msg += `• [${nr}] ${beschr}\n`;
-                });
-                
-                // Den alten Frageteil unten anhängen
-                msg += `\nSollen diese unbesprochenen Platzhalter gelöscht werden?\n\n[OK] = Ja, löschen und Besprechung beenden\n[Abbrechen] = Nein, ich möchte sie noch bearbeiten`;
-                
-                if (confirm(msg)) {
-                    // Die Punkte werden aus dem Array komplett herausgefiltert
-                    arrProtokollDaten = arrProtokollDaten.filter(p => !(p.bolAktuellAnzeigen === true && p.strTyp === "Agenda"));
-                } else {
-                    // Abbruch! Wir schicken den Nutzer in die Listen-Ansicht, damit er sie bearbeiten kann
-                    aktualisiereKombinierteListe();
-                    wechsleAnsicht('view-liste');
-                    return; // Beenden der Besprechung wird hier gestoppt!
+                // NEU: Vorschau der Beschreibung (erste 30 Zeichen)
+                let vorschau = "";
+                if (punkt.strBeschreibung && punkt.strBeschreibung.trim().length > 0) {
+                    vorschau = punkt.strBeschreibung.trim().substring(0, 30);
+                    if (punkt.strBeschreibung.length > 30) vorschau += "...";
+                    vorschau = `\nInhalt: "${vorschau}"\n`; // Formatiert für die Meldung
+                }
+
+                let istAgenda = (punkt.strTyp === "Agenda");
+                let istLeer = (!punkt.strBeschreibung || punkt.strBeschreibung.trim() === "");
+
+                if (istAgenda || istLeer) {
+                    let grund = istAgenda ? 'den Typ "Agenda" hat' : 'keine Beschreibung enthält';
+                    let istLetzterPunkt = (i === punkteDieserBesprechung.length - 1);
+
+                    if (!istLetzterPunkt) {
+                        // Hier wurde die Variable 'vorschau' in die Nachricht eingebaut
+                        let msg = `Punkt [${nrFormatiert}] wird geprüft, da er ${grund}.\n${vorschau}\nSoll dieser Besprechungspunkt gelöscht werden?\n\n[OK] = Löschen\n[Abbrechen] = Zurück zum Bearbeiten`;
+                        
+                        if (confirm(msg)) {
+                            arrProtokollDaten = arrProtokollDaten.filter(p => p.intBesprechungspunktnummer !== punkt.intBesprechungspunktnummer);
+                        } else {
+                            ladePunktInUI(punkt.intBesprechungspunktnummer);
+                            wechsleAnsicht('view-eingabefenster');
+                            return; 
+                        }
+                    } else {
+                        // Auch beim Sonderfall für den letzten Punkt zeigen wir die Vorschau an
+                        let msgLast = `Dies ist der letzte Punkt [${nrFormatiert}] dieser Besprechung.\n${vorschau}\nEr kann nicht gelöscht werden, da die Besprechung sonst leer wäre. Soll der Punkt auf "Info" umgestellt werden mit dem Text: "Keine neuen Punkte in dieser Besprechung"?\n\n[OK] = Ja, Text einfügen & beenden\n[Abbrechen] = Nein, zurück zum Bearbeiten`;
+                        
+                        if (confirm(msgLast)) {
+                            punkt.strTyp = "Info";
+                            punkt.strBeschreibung = "Keine neuen Punkte in dieser Besprechung";
+                        } else {
+                            ladePunktInUI(punkt.intBesprechungspunktnummer);
+                            wechsleAnsicht('view-eingabefenster');
+                            return; 
+                        }
+                    }
                 }
             }
 
-            // 2. Nachzügler auslesen und in die Anwesenheitsliste verschieben (wie bisher)
+            // 4. NACHZÜGLER-LOGIK (Dein bestehender Code)
             const checkboxes = document.querySelectorAll('#liste-nachzuegler-checkboxen input[type="checkbox"]');
             checkboxes.forEach(cb => {
                 if (cb.checked) {
                     const name = cb.value;
-                    arrAnwesende.push(name);
-                    arrAbwesende = arrAbwesende.filter(n => n !== name);
+                    // Nur hinzufügen, wenn noch nicht drin
+                    if (!arrAnwesende.includes(name)) {
+                        arrAnwesende.push(name);
+                        arrAbwesende = arrAbwesende.filter(n => n !== name);
+                    }
                 }
             });
 
+            // 5. Finales Beenden einleiten
             bolBesprechungLaeuft = false;
-            
             beendeBesprechungDirekt();
         }
 
         function beendeBesprechungDirekt() {
             ladeOderSichereAnwesenheit();
+
+            // 1. Zeiten erfassen
+            let datIstEnde = new Date();
+            // Berechnung der Dauer in Minuten aus deinem Timer
+            let dauerMinuten = Math.round(msMeetingDauerBeiLetzterPause / 60000);
+
+            // 2. Objekt für die Historie erstellen 
+            // WICHTIG: Die Namen der Felder müssen zu deiner UI-Funktion passen!
+            let neuerHistorieEintrag = {
+                intBesprNr: intAktBesprNr,                          // Passend zu hist-start-${eintrag.intBesprNr}
+                strTitel: strTitel,
+                strDatum: new Date().toISOString().substring(0, 10), 
+                datIstStartZeit: datMeetingStart.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}),
+                datIstEndeZeit: datIstEnde.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}),
+                intGesamtdauerOhnePause: dauerMinuten,
+                arrAnwesende: [...arrAnwesende],                     // Passend zu eintrag.arrAnwesende
+                arrAbwesende: [...arrAbwesende]                      // Passend zu eintrag.arrAbwesende
+            };
+
+            // 3. In das globale Array schieben (Check auf Doppeleintrag)
+            arrAnwesenheitsHistorie = arrAnwesenheitsHistorie.filter(e => e.intBesprNr !== intAktBesprNr);
             
-            // Die Terminliste nach vorne rücken
+            // Jetzt fügen wir den aktuellen Stand hinzu (so bleibt es immer nur ein Eintrag pro Nummer)
+            arrAnwesenheitsHistorie.push(neuerHistorieEintrag);
+            
+            // 4. Terminliste nach vorne rücken (Dein bestehender Code)
             if (arrNaechsteTermine.length > 0) {
-                arrNaechsteTermine.shift(); // Löscht den ersten Eintrag
-                
-                // Einen neuen Termin ganz hinten anhängen
+                arrNaechsteTermine.shift(); 
                 let letztesDatum = new Date(arrNaechsteTermine[arrNaechsteTermine.length - 1]);
                 let neuesDatum = addiereRhythmus(letztesDatum, strWiederholung);
                 arrNaechsteTermine.push(formatiereDatumFuerInput(neuesDatum));
             }
-            
+
+            // 5. Speichern                    
             speichereDatenInDB(); // Alles in die DB schreiben
             
             // ==========================================
