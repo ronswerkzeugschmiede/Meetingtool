@@ -3643,17 +3643,24 @@
         function terminGeaendert(index, neuerWert) {
             if (!neuerWert) return;
             
+            // 1. Den geänderten Termin speichern
             arrNaechsteTermine[index] = neuerWert;
             
-            // Alle FOLGENDEN Termine ab diesem Index neu berechnen
-            let rechenDatum = new Date(neuerWert);
+            // 2. Alle FOLGENDEN Termine ab diesem Index neu berechnen
+            // Wir nutzen ein lokales Datumsobjekt für die Schleife
+            let aktuellesDatum = new Date(neuerWert);
+            
             for (let i = index + 1; i < arrNaechsteTermine.length; i++) {
-                rechenDatum = addiereRhythmus(rechenDatum, strWiederholung);
-                arrNaechsteTermine[i] = formatiereDatumFuerInput(rechenDatum);
+                // Rhythmus auf das vorherige Datum addieren
+                aktuellesDatum = addiereRhythmus(aktuellesDatum, strWiederholung);
+                arrNaechsteTermine[i] = formatiereDatumFuerInput(aktuellesDatum);
             }
             
-            aktualisiereTermineUI(); // UI neu zeichnen
-            speichereDatenInDB(); // Sofort sichern
+            // 3. UI sofort aktualisieren und Daten sichern
+            aktualisiereTermineUI(); 
+            if (typeof speichereDatenInDB === "function") {
+                speichereDatenInDB(); 
+            }
         }
 
 
