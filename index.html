@@ -6459,8 +6459,10 @@
                 // 2. Laufzeit
                 intAktBesprNr: intAktBesprNr,
                 intAktBesprPunktNr: intAktBesprPunktNr,
+                intGeparkterPunktNr: intGeparkterPunktNr,
                 // 3. Arrays (Stammdaten & Protokolle)
                 arrListeTeilnehmer: arrListeTeilnehmer,
+                arrStilleMitleser: arrStilleMitleser,
                 arrOrganisationen: arrOrganisationen,
                 arrFunktionen: arrFunktionen,
                 arrProjekte: arrProjekte,
@@ -6469,7 +6471,6 @@
                 arrAgendaEinmalig: arrAgendaEinmalig,
                 arrKategorien: arrKategorien,
                 arrProtokollDaten: arrProtokollDaten,
-                arrNaechsteTermine: arrNaechsteTermine,
                 arrNaechsteTermine: arrNaechsteTermine,
                 strTplEinladung: strTplEinladung,
                 strTplErinnerung: strTplErinnerung,
@@ -6513,9 +6514,11 @@
             
             if (paket.intAktBesprNr !== undefined) intAktBesprNr = paket.intAktBesprNr;
             if (paket.intAktBesprPunktNr !== undefined) intAktBesprPunktNr = paket.intAktBesprPunktNr;
+            if (paket.intGeparkterPunktNr !== undefined) intGeparkterPunktNr = paket.intGeparkterPunktNr;
 
             // Arrays wiederherstellen
-            if (paket.arrListeTeilnehmer) arrListeTeilnehmer = paket.paketListeTeilnehmer || paket.arrListeTeilnehmer; 
+            if (paket.arrListeTeilnehmer) arrListeTeilnehmer = paket.arrListeTeilnehmer || paket.arrListeTeilnehmer; 
+            if (paket.arrStilleMitleser) arrStilleMitleser = paket.arrStilleMitleser;
             if (paket.arrOrganisationen !== undefined) arrOrganisationen = paket.arrOrganisationen;
             if (paket.arrFunktionen !== undefined) arrFunktionen = paket.arrFunktionen;
             if (paket.arrProjekte) arrProjekte = paket.arrProjekte;
