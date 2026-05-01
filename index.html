@@ -6,6 +6,20 @@
     <title>Besprechungsprotokoll Tool</title>
     
     <style>
+        /* Löschfunktion für die Tabs */
+        .tab-close-btn {
+            margin-left: 10px;
+            padding: 0 4px;
+            border-radius: 3px;
+            color: #999;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .tab-close-btn:hover {
+            background: #ff5f5f;
+            color: white;
+        }
         /* Styling für die Einstellungs-Karten */
         .settings-card {
             background: var(--card-bg, #fff);
@@ -105,6 +119,75 @@
             padding: 8px;
             width: 100%;
             box-sizing: border-box;
+        }
+
+        .tab-button {
+            padding: 8px 15px;
+            background: #d1d8dd;
+            border: 1px solid #bbb;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9em;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            background: white;
+            font-weight: bold;
+            border-top: 3px solid #0056b3;
+            padding-bottom: 10px;
+            margin-bottom: -2px; /* Schließt bündig mit dem Container ab */
+        }
+
+        /* Darkmode Korrektur */
+        .dark-mode .tab-button {
+            background: #333;
+            color: #eee;
+            border-color: #555;
+        }
+
+        .dark-mode .tab-button.active {
+            background: #444;
+            border-top-color: #17a2b8;
+        }
+
+        .dark-mode #tab-container {
+            background: #222;
+            border-bottom-color: #444;
+        }
+
+        /*  Teilnehmerverwaltung */
+        #liste-teilnehmer-ui li, 
+        #liste-teilnehmer-ui span {
+            color: #000000; 
+        }
+
+        .dark-mode #liste-teilnehmer-ui li,
+        .dark-mode #liste-teilnehmer-ui span {
+            color: #e0e0e0 !important; 
+        }
+
+        /* Darkmode-Anpassung für blaue Texte (Titel & Kachel-Überschriften) */
+
+        /* Besprechungstitel */
+        .dark-mode #ui-titel {
+            color: #4dabff !important; /* Ein helleres, freundliches Blau */
+        }
+
+        /* Die Überschriften in den Menü-Kacheln (z.B. Ablauf & Vorbereitung) */
+        .dark-mode h3 {
+            color: #4dabff !important;
+            border-bottom-color: #4dabff !important; /* Falls eine Linie darunter ist */
+        }
+
+        /* Falls du spezifische IDs für die Kachel-Header nutzt */
+        .dark-mode [style*="color: #0056b3"] {
+            color: #4dabff !important;
         }
 
         /* ========================================== */
@@ -453,35 +536,43 @@
 </head>
 
 <body>
-    <div id="global-top-right" style="position: fixed; top: 15px; right: 20px; display: flex; align-items: flex-start; gap: 15px; z-index: 1000; margin-top: 8px;">
-        
-        <div style="text-align: right; background: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px;">
-            <img id="ui-logo-global" alt="Logo" style="max-height: 60px; object-fit: contain;" 
-                 onerror="this.style.display='none'; document.getElementById('logo-hinweis-global').style.display='block';">
-            <span id="logo-hinweis-global" style="display:none; color: gray; font-size: 0.8em;">(Kein Logo hinterlegt)</span>
+    <!-- 1. REIHE: Nur für die Tabs (Fixiert ganz oben) -->
+    <div id="tab-leiste-global" style="position: fixed; top: 0; left: 0; width: 100%; display: flex; align-items: center; background: #eef2f5; border-bottom: 2px solid #ddd; z-index: 1001; height: 50px; padding: 0 20px;">
+        <div id="reihen-tabs" style="display: flex; gap: 5px; height: 100%; align-items: flex-end;">
+            <!-- Tabs werden hier eingefügt -->
         </div>
+        <button onclick="neueReiheErstellen()" style="background: #28a745; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 15px;">+ Neu</button>
         
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <button id="btn-home" onclick="ladeStammdatenInUI(); wechsleAnsicht('view-startmenue')" style="margin: 0; padding: 6px 12px; border-radius: 6px; cursor: pointer; background: #0056b3; color: white; border: none; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: none;" title="Zurück zum Startmenü">
-                🏠 Startmenü
-            </button>
-            <button id="btn-darkmode" onclick="toggleDarkMode()" style="margin: 0; padding: 6px 12px; border-radius: 6px; cursor: pointer; background: #333; color: white; border: none; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" title="Zwischen Hell- und Dunkelmodus wechseln">
-                🌙 Darkmode
-            </button>
+        <!-- Darkmode & Home Button (dezent rechts oben in der Tab-Leiste) -->
+        <div style="margin-left: auto; display: flex; gap: 8px;">
+            <button id="btn-home" onclick="ladeStammdatenInUI(); wechsleAnsicht('view-startmenue')" style="padding: 4px 10px; border-radius: 4px; cursor: pointer; background: #0056b3; color: white; border: none; font-size: 0.85em; display: none;">🏠 Startmenü</button>
+            <button onclick="toggleDarkMode()" style="padding: 4px 10px; border-radius: 4px; cursor: pointer; background: #333; color: white; border: none; font-size: 0.85em;">🌙 Mode</button>
         </div>
-        
     </div>
 
-    </div>
+    <!-- PLATZHALTER: Damit der Inhalt nicht unter der fixierten Tab-Leiste verschwindet -->
+    <div style="height: 60px;"></div>
+
+    <div id="main-content-container" style="padding: 0 20px;">
+        
+        <!-- 2. REIHE: Organisation, Titel & Logo -->
+        <div id="header-identitaet" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+            
+            <div id="titel-bereich">
+                <div id="ui-orga-name" style="color: gray; font-size: 14px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">MEINE ORGANISATION</div>
+                <h1 id="ui-titel" style="margin: 0; color: #0056b3; font-size: 2.2em;">Reihe 3</h1>
+            </div>
+
+            <div id="logo-bereich" style="text-align: right;">
+                <img id="ui-logo-global" alt="Logo" style="max-height: 80px; object-fit: contain;" 
+                    onerror="this.style.display='none'; document.getElementById('logo-hinweis-global').style.display='block';">
+                <span id="logo-hinweis-global" style="display:none; color: gray; font-size: 0.8em;">(Kein Logo hinterlegt)</span>
+            </div>
+            
+        </div>
+
     <div id="print-bereich"></div>
     <div id="view-startmenue" class="ansicht aktiv">
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-            <div style="flex-grow: 1;">
-                <div id="ui-orga-name" style="color: gray; font-size: 14px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"></div>
-                <h1 id="ui-titel" style="margin: 0; color: #0056b3;">Lade...</h1>
-            </div>
-        </div>
         
         <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 30px; margin-bottom: 30px;">
             
@@ -495,8 +586,11 @@
                 <button onclick="oeffneTermine()" style="width: 100%; text-align: left; margin-bottom: 8px; padding: 10px;" title="Zeigt automatisch berechnete Folgetermine an und generiert Einladungen für die Teilnehmer.">
                     📅 Nächste Termine & Einladungen
                 </button>
-                <button onclick="oeffneErinnerungen()" style="width: 100%; text-align: left; margin-bottom: 0; padding: 10px;" title="Verschickt gezielte E-Mail-Erinnerungen an Personen, die noch offene Aufgaben aus vergangenen Besprechungen haben.">
+                <button onclick="oeffneErinnerungen()" style="width: 100%; text-align: left; margin-bottom: 8px; padding: 10px;" title="Verschickt gezielte E-Mail-Erinnerungen an Personen, die noch offene Aufgaben aus vergangenen Besprechungen haben.">
                     🔔 Erinnerungen versenden
+                </button>
+                <button onclick="oeffneAgenda()" style="width: 100%; text-align: left; margin-bottom: 8px; padding: 10px;" title="Definiere einmalige und regelmäßige Themen, für die Besprechungen.">
+                    📋 Agendapunkte verwalten
                 </button>
             </div>
 
@@ -530,9 +624,6 @@
                 </button>
                 <button onclick="oeffneProjekte()" style="width: 100%; text-align: left; margin-bottom: 8px; padding: 10px;" title="Erstelle und bearbeite Projekte, um Besprechungspunkte thematisch besser zuordnen zu können.">
                     📁 Projekte verwalten
-                </button>
-                <button onclick="oeffneAgenda()" style="width: 100%; text-align: left; margin-bottom: 8px; padding: 10px;" title="Definiere einmalige und regelmäßige Themen, für die Besprechungen.">
-                    📋 Agendapunkte verwalten
                 </button>
                 <button onclick="oeffneKategorien()" style="width: 100%; text-align: left; margin-bottom: 8px; padding: 10px;" title="Passe die Dropdown-Kategorien für die Anlage neuer Besprechungspunkte an.">
                     🏷️ Kategorien verwalten
@@ -627,9 +718,9 @@
     <div id="view-teilnehmer" class="ansicht">
         <h2>Teilnehmerverwaltung</h2>
         
-        <div style="background: #eef2f5; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <div style="padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <strong>Vorhandene Teilnehmer:</strong>
-            <ul id="liste-teilnehmer-ui" style="margin-top: 10px; padding-left: 20px; line-height: 1.8;">
+            <ul id="liste-teilnehmer-ui" style="margin-top: 10px; line-height: 1.8;">
                 </ul>
             <button onclick="neuerTeilnehmer()" style="margin-top: 10px;">+ Neuen Teilnehmer anlegen</button>
         </div>
@@ -1093,7 +1184,7 @@
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div style="background: #eef2f5; padding: 12px; border-radius: 6px;">
-                    <p style="margin-top: 0; font-weight: bold; font-size: 0.9em;">JSON (Vollständiges Backup)</p>
+                    <p style="margin-top: 0; font-weight: bold; font-size: 0.9em;">JSON (Backup aktive Besprechungsreihe)</p>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button onclick="document.getElementById('file-import').click()" style="background: #ffc107; color: black; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.85em; cursor: pointer;">📥 Import</button>
                         <input type="file" id="file-import" style="display:none" onchange="importiereJSON(event)">
@@ -1102,13 +1193,22 @@
                 </div>
 
                 <div style="background: #eef2f5; padding: 12px; border-radius: 6px;">
-                    <p style="margin-top: 0; font-weight: bold; font-size: 0.9em;">CSV (Tabellen-Daten)</p>
+                    <p style="margin-top: 0; font-weight: bold; font-size: 0.9em;">CSV (Tabellen-Daten der aktiven Besprechungsreihe)</p>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button onclick="document.getElementById('input-csv-import').click()" style="background: #ffc107; color: #212529; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.85em; cursor: pointer; font-weight: bold;">📥 Import</button>
                         <input type="file" id="input-csv-import" accept=".csv" style="display: none;" onchange="importiereCSV(event)">
                         <button onclick="exportiereListeAlsCSV()" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.85em; cursor: pointer;">📤 Export</button>
                     </div>
                 </div>
+            </div>                       
+            <div style="background: #eef2f5;  border: 1px solid var(--border-color, #ddd); padding: 20px; border-radius: 8px; margin-top: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <p style="margin-top: 0; font-weight: bold; color: #004085; font-size: 0.95em;">🌎 Gesamtes System (Alle Reihen & Tabs)</p>
+                <p style="font-size: 0.8em; color: #444; margin-bottom: 12px;">Sichert alle Besprechungsreihen inklusive aller Einstellungen und Historien in einer einzigen Datei.</p>
+                
+                <button onclick="exportiereAlleReihenJSON()" style="flex: 1; background: #0056b3; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 Komplett-Backup erstellen</button>
+                
+                <button onclick="document.getElementById('file-import-global').click()" style="flex: 1; background: #ffc107; color: black; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">📥 Backup einspielen</button>
+                <input type="file" id="file-import-global" style="display:none" onchange="importiereGlobalJSON(event)">
             </div>
         </div>
 
@@ -1408,6 +1508,7 @@
         // VARIABLEN (Allgemeine Einstellungen)
         // ==========================================
         let strTitel = "Meine Besprechungsserie"; // Titel der Besprechungsreihe
+        let arrAlleReihen = [];
         let strOrdnerpfad = ""; // Pfad der HTML-Datei (wird dynamisch ermittelt, wo möglich)
         let arrModus = ["Einzelprojekt", "Multiprojekt"]; // Array zur Auswahl des Modus
         let strAktuellerModus = "Multiprojekt"; // Der aktuell gewählte Modus
@@ -1612,6 +1713,99 @@
                 btnHome.style.display = (ansichtId === 'view-startmenue') ? 'none' : 'block';
             }
         }
+
+        function aktualisiereTabLeiste() {
+            const container = document.getElementById('reihen-tabs');
+            container.innerHTML = "";
+
+            arrAlleReihen.forEach((reihe, index) => {
+                const btn = document.createElement('button');
+                btn.className = `tab-button ${index === intAktiverReihenIndex ? 'active' : ''}`;
+                
+                // Titel-Text
+                const span = document.createElement('span');
+                span.innerText = reihe.strTitel || "Unbenannt";
+                span.onclick = () => {
+                    sichereAktuelleReiheInLokalemArray();
+                    ladeReiheAusLokalemArray(index);
+                    aktualisiereTabLeiste();
+                };
+                
+                btn.appendChild(span);
+
+                // Lösch-Button (nur anzeigen wenn mehr als 1 Reihe existiert)
+                if (arrAlleReihen.length > 1) {
+                    const closeBtn = document.createElement('span');
+                    closeBtn.className = "tab-close-btn";
+                    closeBtn.innerText = "×";
+                    closeBtn.onclick = (e) => {
+                        e.stopPropagation(); // Verhindert, dass der Tab aktiviert wird
+                        reiheLoeschen(index);
+                    };
+                    btn.appendChild(closeBtn);
+                }
+
+                container.appendChild(btn);
+            });
+        }
+
+        function reiheLoeschen(index) {
+            const reihe = arrAlleReihen[index];
+            if (!confirm(`Besprechungsreihe "${reihe.strTitel}" wirklich unwiderruflich löschen?`)) return;
+
+            // Reihe aus dem Array entfernen
+            arrAlleReihen.splice(index, 1);
+
+            // Index anpassen, falls wir die gerade aktive Reihe gelöscht haben
+            if (intAktiverReihenIndex >= index) {
+                intAktiverReihenIndex = Math.max(0, intAktiverReihenIndex - 1);
+            }
+
+            // Die verbliebene Reihe laden
+            ladeReiheAusLokalemArray(intAktiverReihenIndex);
+            aktualisiereTabLeiste();
+            
+            if(typeof speichereDatenInDB === "function") speichereDatenInDB();
+        }
+
+        function neueReiheErstellen() {
+            const name = prompt("Name der neuen Besprechungsreihe:", "Neue Reihe");
+            if (!name) return;
+
+            // 1. Aktuellen Stand im Array sichern, bevor wir ihn verlassen
+            sichereAktuelleReiheInLokalemArray();
+
+            // 2. Variablen-Reset OHNE Bestätigungsdialog
+            // Wir setzen die wichtigsten Variablen direkt auf Startwerte
+            strTitel = name;
+            intAktBesprNr = 0;
+            intAktBesprPunktNr = 101;
+            arrProtokollDaten = [];
+            arrAnwesenheitsHistorie = [];
+            arrNaechsteTermine = [];
+            // ... hier ggf. weitere wichtige Arrays leeren ...
+
+            // 3. Ein frisches Datenpaket für die neue Reihe erstellen
+            const neuesPaket = sammleAlleDaten();
+            
+            // 4. In die Liste aufnehmen
+            arrAlleReihen.push(neuesPaket);
+            intAktiverReihenIndex = arrAlleReihen.length - 1;
+            speichereDatenInDB();
+
+            // 5. UI aktualisieren
+            document.getElementById('ui-titel').innerText = strTitel;
+            aktualisiereTabLeiste();
+            
+            // 6. Zur Sicherheit in der DB speichern (Schritt C bereiten wir vor)
+            if(typeof speichereDatenInDB === "function") speichereDatenInDB();
+            
+            // Zurück zum Startmenü der neuen Reihe
+            aktualisiereTabLeiste();
+            document.getElementById('ui-titel').innerText = strTitel;
+            wechsleAnsicht('view-startmenue');
+        }
+
         
         // ==========================================
         // FUNKTIONEN: Einstellungen & Vorschau
@@ -1687,6 +1881,40 @@
             strNamenszusatz = document.getElementById('select-namenszusatz').value;
 
             aktualisiereLogoDisplay(); // Ändert das Logo oben rechts sofort!
+        }
+
+        // Variable, die merkt, welche Reihe gerade aktiv ist (Index im Array)
+        let intAktiverReihenIndex = 0; 
+
+        // SCHRITT A1: Den aktuellen Zustand in das große Array sichern
+        function sichereAktuelleReiheInLokalemArray() {
+            const aktuellerDatenSatz = sammleAlleDaten();
+            
+            // Prüfen, ob wir die Reihe schon im Array haben (anhand des Index)
+            if (arrAlleReihen[intAktiverReihenIndex]) {
+                arrAlleReihen[intAktiverReihenIndex] = aktuellerDatenSatz;
+            } else {
+                arrAlleReihen.push(aktuellerDatenSatz);
+            }
+        }
+
+        function ladeReiheAusLokalemArray(index) {
+            // 1. Sicherheitscheck: Existiert dieser Koffer überhaupt?
+            if (arrAlleReihen[index] !== undefined && arrAlleReihen[index] !== null) {
+                intAktiverReihenIndex = index;
+                const paket = arrAlleReihen[index];
+                
+                console.log("Lade Datenpaket für Index " + index, paket); // Debug-Hilfe
+                
+                verteileAlleDaten(paket); 
+                
+                // UI Refresh erzwingen
+                document.getElementById('ui-titel').innerText = strTitel;
+                console.log("Erfolgreich gewechselt zu: " + strTitel);
+            } else {
+                console.error("Fehler: Keine Daten an Index " + index + " gefunden! (undefined)");
+                alert("Besprechungsreihe konnte nicht geladen werden.");
+            }
         }
 
         // ==========================================
@@ -6575,38 +6803,63 @@
         // ==========================================
         // FUNKTIONEN: IndexedDB Datenbank
         // ==========================================
-        // (Die Funktion initDB() bleibt, wie sie war!)
 
         function speichereDatenInDB() {
             if (!db) return;
+
+            // 1. Aktuellen Stand der gerade offenen Reihe im Array sichern
+            sichereAktuelleReiheInLokalemArray();
+
+            // 2. Transaktion für den Store "protokolle" starten
             const transaction = db.transaction(["protokolle"], "readwrite");
-            const objectStore = transaction.objectStore("protokolle");
-            
-            // Wir speichern das komplette Bündel!
-            const request = objectStore.put(sammleAlleDaten());
+            const store = transaction.objectStore("protokolle");
 
-            request.onerror = function() {
-                console.error("Fehler beim Speichern in die IndexedDB.");
+            // 3. Das Gesamtpaket schnüren
+            const masterPaket = {
+                id: "master_config",
+                intAktiverReihenIndex: intAktiverReihenIndex,
+                arrAlleReihen: arrAlleReihen
             };
-        }
 
+            // 4. In die DB schreiben (überschreibt das alte Paket)
+            const request = store.put(masterPaket);
+
+            request.onsuccess = () => console.log("Alle Reihen gespeichert.");
+            request.onerror = (e) => console.error("Speicherfehler:", e.target.error);
+        }
+        
         function ladeDatenAusDB() {
             if (!db) return;
+
             const transaction = db.transaction(["protokolle"], "readonly");
-            const objectStore = transaction.objectStore("protokolle");
-            const request = objectStore.get("meineProtokollDaten");
+            const store = transaction.objectStore("protokolle");
+            const request = store.get("master_config");
 
             request.onsuccess = function(event) {
-                if (request.result) {
-                    verteileAlleDaten(request.result);
-                    console.log("Alle Daten erfolgreich geladen.");
+                const ergebnis = event.target.result;
+
+                if (ergebnis && ergebnis.arrAlleReihen) {
+                    // Wir haben Daten gefunden!
+                    arrAlleReihen = ergebnis.arrAlleReihen;
+                    intAktiverReihenIndex = ergebnis.intAktiverReihenIndex || 0;
+
+                    // Die Daten der aktiven Reihe in die globalen Variablen verteilen
+                    verteileAlleDaten(arrAlleReihen[intAktiverReihenIndex]);
+                } else {
+                    // Falls die DB ganz neu/leer ist:
+                    console.log("Keine Master-Daten gefunden. Initialisiere erste Reihe.");
+                    arrAlleReihen = [sammleAlleDaten()];
+                    intAktiverReihenIndex = 0;
+                    // Optional: Sofort speichern, damit die Struktur steht
+                    speichereDatenInDB();
                 }
+
+                // Immer die Tabs neu zeichnen
+                aktualisiereTabLeiste();
+                document.getElementById('ui-titel').innerText = strTitel;
             };
-
-            wendeDarkModeAn(); // Wendet den Darkmode beim Start an, falls aktiviert
-            aktualisiereLogoDisplay();
         }
-
+        
         function werkseinstellungenLaden() {
             if(confirm("ACHTUNG: Möchtest du wirklich alle Daten komplett löschen?\nDas Tool fängt dann wieder absolut bei 0 an!")) {
                 
@@ -6630,6 +6883,130 @@
         // ==========================================
         // FUNKTIONEN: JSON Backup (Export / Import)
         // ==========================================
+
+        function exportiereAlleReihenJSON() {
+            // Paket für alle Reihen
+            const globalPaket = {
+                typ: "GLOBAL_BACKUP",
+                datum: new Date().toISOString(),
+                anzahl: arrAlleReihen.length,
+                intAktiverReihenIndex: intAktiverReihenIndex,
+                daten: arrAlleReihen
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalPaket));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ProtokollTool_Gesamtbackup_" + formatiereDatumFuerDateiname(new Date()) + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importiereGlobalJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importDaten = JSON.parse(e.target.result);
+
+                    if (importDaten.typ === "GLOBAL_BACKUP") {
+                        if (confirm(`Achtung: Dies ist ein Gesamt-Backup mit ${importDaten.anzahl} Reihen. Möchtest du alle aktuellen Daten damit überschreiben?`)) {
+                            arrAlleReihen = importDaten.daten;
+                            intAktiverReihenIndex = importDaten.intAktiverReihenIndex || 0;
+                            
+                            // Die erste verfügbare Reihe aktivieren
+                            ladeReiheAusLokalemArray(intAktiverReihenIndex);
+                            speichereDatenInDB();
+                            aktualisiereTabLeiste();
+                            alert("Gesamt-Backup erfolgreich geladen!");
+                        }
+                    } else {
+                        // Es ist ein Einzel-Export
+                        if (confirm("Einzelne Besprechungsreihe als neue Reihe hinzufügen?")) {
+                            arrAlleReihen.push(importDaten);
+                            intAktiverReihenIndex = arrAlleReihen.length - 1;
+                            ladeReiheAusLokalemArray(intAktiverReihenIndex);
+                            speichereDatenInDB();
+                            aktualisiereTabLeiste();
+                        }
+                    }
+                } catch (err) {
+                    alert("Fehler beim Lesen der Datei: " + err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Hilfsfunktion für den Dateinamen
+        function formatiereDatumFuerDateiname(date) {
+            return date.toISOString().split('T')[0] + "_" + date.getHours() + "-" + date.getMinutes();
+        }
+
+        // 1. Globaler Export
+        function exportiereAlleReihenJSON() {
+            sichereAktuelleReiheInLokalemArray(); // Wichtig: Erst aktuellen Stand einfrieren
+
+            const globalPaket = {
+                typ: "GLOBAL_BACKUP",
+                version: strDateiversion,
+                datum: new Date().toISOString(),
+                anzahl: arrAlleReihen.length,
+                intAktiverReihenIndex: intAktiverReihenIndex,
+                daten: arrAlleReihen
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalPaket));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ProtokollTool_VOLL_BACKUP_" + formatiereDatumFuerDateiname(new Date()) + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // 2. Intelligenter Import (Einzeln oder Global)
+        function importiereGlobalJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importDaten = JSON.parse(e.target.result);
+
+                    // Prüfen: Ist es ein Gesamt-Backup?
+                    if (importDaten.typ === "GLOBAL_BACKUP") {
+                        if (confirm(`Achtung: Dies ist ein Gesamt-Backup mit ${importDaten.anzahl} Reihen. Deine aktuellen Daten werden komplett durch dieses Backup ersetzt. Fortfahren?`)) {
+                            arrAlleReihen = importDaten.daten;
+                            intAktiverReihenIndex = importDaten.intAktiverReihenIndex || 0;
+                            
+                            ladeReiheAusLokalemArray(intAktiverReihenIndex);
+                            speichereDatenInDB();
+                            aktualisiereTabLeiste();
+                            alert("Gesamt-Backup erfolgreich wiederhergestellt!");
+                        }
+                    } else {
+                        // Es ist ein Einzel-Export
+                        if (confirm("Möchtest du diese einzelne Besprechungsreihe als neue Reihe hinzufügen?")) {
+                            arrAlleReihen.push(importDaten);
+                            intAktiverReihenIndex = arrAlleReihen.length - 1;
+                            ladeReiheAusLokalemArray(intAktiverReihenIndex);
+                            speichereDatenInDB();
+                            aktualisiereTabLeiste();
+                            alert("Reihe erfolgreich als neuer Tab hinzugefügt!");
+                        }
+                    }
+                } catch (err) {
+                    alert("Fehler beim Import: Die Datei ist beschädigt oder kein gültiges Format.");
+                    console.error(err);
+                }
+                event.target.value = ""; // Input zurücksetzen
+            };
+            reader.readAsText(file);
+        }
 
         function exportiereJSON() {
             // 1. Alle Daten sammeln
