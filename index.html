@@ -1357,6 +1357,8 @@
                 <div style="font-size: 0.85em; color: #555; margin-top: 0; padding: 2px 0 0 0; background-color: transparent; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                     <span style="opacity: 0.8;"><b>Schnelleingabe zum Einfügen</b></span>
                     
+                    <span style="color: #0056b3;"><b>#</b> Hashtag</span>
+                    <span style="color: #ccc;">|</span>
                     <span style="color: #0056b3;"><b>##</b> Kat/Projekt</span>
                     <span style="color: #ccc;">|</span>
                     <span style="color: #0056b3;"><b>###</b> Verlinkung</span>
@@ -3191,7 +3193,9 @@
             let blob = new Blob([htmlShell], { type: 'text/html;charset=utf-8;' });
             let link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Punkte_Export_${new Date().toISOString().substring(0,10)}.html`;
+
+            link.download = generiereDateiname(strTitel, intAktBesprNr, "html");
+
             link.style.display = 'none';
             document.body.appendChild(link);
             link.click();
@@ -3244,7 +3248,9 @@
             let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); 
             let link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Punkte_Export_${new Date().toISOString().substring(0,10)}.csv`;
+
+            link.download = generiereDateiname(strTitel, intAktBesprNr, "csv");
+
             link.style.display = 'none';
             document.body.appendChild(link);
             link.click();
@@ -7030,7 +7036,7 @@
             // 5. Einen unsichtbaren Download-Link erstellen und klicken
             const a = document.createElement('a');
             a.href = url;
-            a.download = dynamischerDateiname; // <-- HIER WIRD DER NEUE NAME GENUTZT
+            a.download = dynamischerDateiname + ".json"; // <-- HIER WIRD DER NEUE NAME GENUTZT
             document.body.appendChild(a);
             a.click();
             
@@ -7127,7 +7133,7 @@
             let formatierteNummer = String(echteNummer).padStart(3, '0');
 
             // 3. Den finalen Dateinamen zusammensetzen
-            return saubererTitel + "_" + formatierteNummer + ".json";
+            return saubererTitel + "_" + formatierteNummer;
         }
         
         // ==========================================
