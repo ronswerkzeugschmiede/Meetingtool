@@ -1551,6 +1551,43 @@
         <button onclick="wechsleAnsicht('view-eingabefenster')">Zurück zum Protokoll</button>
     </div>
 
+    <div id="modal-entscheidung" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+        <div style="background:var(--bg-card, white); color:var(--text-main, #333); width:90%; max-width:600px; padding:20px; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5); max-height:90vh; overflow-y:auto;">
+            <h3 style="margin-top:0;">⚖️ Entscheidung strukturieren</h3>
+            
+            <label>Die Entscheidung (Kurzform):</label>
+            <input type="text" id="entscheid-titel" style="width:100%; margin-bottom:10px;" placeholder="Was wurde beschlossen?">
+
+            <label>Problemstellung / Hintergrund (Ist-Zustand):</label>
+            <textarea id="entscheid-hintergrund" style="width:100%; height:60px; margin-bottom:10px;"></textarea>
+
+            <label>Ziel / Motiv (Ideal-Zustand):</label>
+            <textarea id="entscheid-ziel" style="width:100%; height:60px; margin-bottom:10px;"></textarea>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label>Alternative A (nicht gewählt):</label>
+                    <input type="text" id="entscheid-alt-a" style="width:100%;" placeholder="Option A">
+                    <textarea id="entscheid-alt-a-procontra" style="width:100%; height:40px; font-size:0.85em;" placeholder="Vor-/Nachteile A"></textarea>
+                </div>
+                <div>
+                    <label>Alternative B (nicht gewählt):</label>
+                    <input type="text" id="entscheid-alt-b" style="width:100%;" placeholder="Option B">
+                    <textarea id="entscheid-alt-b-procontra" style="width:100%; height:40px; font-size:0.85em;" placeholder="Vor-/Nachteile B"></textarea>
+                </div>
+            </div>
+
+            <label>Vor- und Nachteile der gewählten Entscheidung bzw. offene Punkte:</label>
+            <textarea id="entscheid-bewertung" style="width:100%; height:60px; margin-bottom:15px;" placeholder="Warum genau dieser Weg? Fehlen noch Informationen zur Entscheidung (Vorbereitung)"></textarea>
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="verarbeiteEntscheidung('final')" style="background:#28a745; color:white; flex:1; padding:10px; border-radius:4px; font-weight:bold;">✅ Final Speichern</button>
+                <button onclick="verarbeiteEntscheidung('vorbereitung')" style="background:#6c757d; color:white; flex:1; padding:10px; border-radius:4px;">⏳ Vorbereitung</button>
+                <button onclick="verarbeiteEntscheidung('abbruch')" style="background:#6c757d; color:white; flex:1; padding:10px; border-radius:4px;">❌ Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==========================================
         // KONSTANTEN
@@ -1686,7 +1723,8 @@
         // ==========================================
         let intAktuellerFokusIndex = -1;      // Merkt sich, welcher Button gerade markiert ist
         let arrAktuellePopupButtons = [];     // Speichert alle Buttons des aktuell offenen Menüs
-        let strAktiverPopupModus = "";        // Merkt sich, ob wir "Einzeln" (++) oder "Gruppe" (++++) einfügen wollen
+        let strAktiverPopupModus = "";        // Merkt sich, ob wir "Einzeln" (++) oder "Gruppe" (++++) einfügen wolle
+        let strOriginalTextBackup = "";       // Merkt sich den Text vor dem Aufklappen
 
         // ==========================================
         // Globale Variablen für die Hashtag-Suche
@@ -2377,15 +2415,26 @@
                 textarea.style.borderLeft = "4px solid #ffc107";
                 setTimeout(() => textarea.style.borderLeft = "1px solid #ccc", 1000);
             } 
+
             // Prüfung auf Entscheidung
             else if (triggerEntscheidung.some(trigger => checkText.endsWith(trigger))) {
+                // 1. Typ sofort umschalten
                 document.getElementById('select-typ').value = "Entscheidung";
                 
+                // 2. UI-Felder (wie Datumsfelder) anpassen
                 if (typeof prüfeTypAuswahl === "function") prüfeTypAuswahl();
-                if (typeof speicherePunktAusUI === "function") speicherePunktAusUI();
+
+                // 3. Struktur-Formular öffnen
+                oeffneEntscheidungsModal();
                 
+                // 4. Visuelles Feedback (Nur einmal nötig)
                 textarea.style.borderLeft = "4px solid #dc3545";
-                setTimeout(() => textarea.style.borderLeft = "1px solid #ccc", 1000);
+                setTimeout(() => {
+                    textarea.style.borderLeft = "1px solid #ccc";
+                }, 1000);
+
+                // HINWEIS: speicherePunktAusUI() rufen wir hier NICHT auf, 
+                // da das Modal das Textfeld gleich noch komplett neu beschreibt.
             }
 
             // 4. STRINGS AUSLESEN FÜR DIE TRIGGER
@@ -2441,6 +2490,94 @@
                 if (typeof oeffneHashMenue === "function") oeffneHashMenue();
                 return;
             }
+        }
+        // ==========================================
+        // Entscheidungsmodul
+        // ==========================================
+        function oeffneEntscheidungsModal() {
+            if(objAktuellesTextfeld) {
+                // Backup des aktuellen Inhalts machen, falls man abbricht
+                strOriginalTextBackup = objAktuellesTextfeld.value;
+
+                let rohtext = objAktuellesTextfeld.value.trim();
+                let parts = rohtext.split(' ');
+                parts.pop(); 
+                document.getElementById('entscheid-titel').value = parts.join(' ');
+            }
+
+            // Vorausfüllen der ersten Alternative
+            document.getElementById('entscheid-alt-a').value = "Nichts tun";
+            document.getElementById('entscheid-alt-a-procontra').value = "Vorteil: Kein Aufwand/Kosten ; Nachteil: Problem bleibt bestehen.";
+            document.getElementById('entscheid-alt-b-procontra').value = "Vorteil: ;Nachteil: ";
+
+            // Modal anzeigen
+            document.getElementById('modal-entscheidung').style.display = 'flex';
+        }
+
+        function verarbeiteEntscheidung(modus) {
+            // 1. Der "Uups"-Abbruch (Echter Abbruch)
+            if (modus === 'abbruch') {
+                if (objAktuellesTextfeld) {
+                    objAktuellesTextfeld.value = strOriginalTextBackup;
+                    document.getElementById('select-typ').value = "Info";
+                    if (typeof prüfeTypAuswahl === "function") prüfeTypAuswahl();
+                }
+                schliesseEntscheidungsModal();
+                return;
+            }
+
+            // 2. Daten aus dem Formular auslesen
+            const titel = document.getElementById('entscheid-titel').value;
+            const hintergrund = document.getElementById('entscheid-hintergrund').value;
+            const ziel = document.getElementById('entscheid-ziel').value;
+            const altA = document.getElementById('entscheid-alt-a').value;
+            const altA_pc = document.getElementById('entscheid-alt-a-procontra').value;
+            const altB = document.getElementById('entscheid-alt-b').value;
+            const altB_pc = document.getElementById('entscheid-alt-b-procontra').value;
+            const bewertung = document.getElementById('entscheid-bewertung').value;
+
+            let finalerText = "";
+
+            // 3. Fallunterscheidung nach Modus
+            if (modus === 'final') {
+                finalerText = `${titel}\n\n` +
+                    `Hintergrund\n- ${hintergrund}\n\n` +
+                    `Ziel\n- ${ziel}\n\n` +
+                    `Verworfene Alternativen\n- ${altA}: ${altA_pc}\n- ${altB}: ${altB_pc}\n\n` +
+                    `Bewertung\n- ${bewertung}`;
+                
+                document.getElementById('select-typ').value = "Entscheidung";
+            } 
+            else if (modus === 'vorbereitung') {
+                finalerText = `Zur Entscheidungsvorbereitung ${titel} ist noch die folgende Aufgabe zu erledigen: ${bewertung}\n\n` +
+                    `Hintergrund: - ${hintergrund}\n Ziel: - ${ziel}`;
+                
+                document.getElementById('select-typ').value = "Aufgabe";
+            }
+
+            // 4. Textfeld im Hauptprogramm füllen
+            if (objAktuellesTextfeld) {
+                objAktuellesTextfeld.value = finalerText;
+                // Wichtig für die automatische Höhenanpassung der Textarea
+                objAktuellesTextfeld.dispatchEvent(new Event('input'));
+                
+                if (typeof speicherePunktAusUI === "function") speicherePunktAusUI();
+                if (typeof prüfeTypAuswahl === "function") prüfeTypAuswahl();
+            }
+
+            // 5. Fenster schließen und Felder leeren
+            schliesseEntscheidungsModal();
+        }
+
+       
+        // Hilfsfunktion zum Aufräumen
+        function schliesseEntscheidungsModal() {
+            document.getElementById('modal-entscheidung').style.display = 'none';
+            // Alle Felder leeren
+            ["entscheid-titel", "entscheid-hintergrund", "entscheid-ziel", "entscheid-alt-a", "entscheid-alt-a-procontra", "entscheid-alt-b", "entscheid-alt-b-procontra", "entscheid-bewertung"].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = "";
+            });
         }
 
         // ==========================================
@@ -5789,15 +5926,33 @@
             const gewaehlterOrtName = document.getElementById('select-ort').value || "Unbekannt";
             let ortObj = arrBesprOrte.find(o => o.strName === gewaehlterOrtName);
             let ort = gewaehlterOrtName;
-            
+
             if (ortObj && ortObj.strLinkOderAdresse) {
                 if (ortObj.bolOnline && ortObj.strLinkOderAdresse.startsWith("http")) {
-                    ort += ` (${ortObj.strLinkOderAdresse})`;
+                    let originalLink = ortObj.strLinkOderAdresse;
+                    
+                    // 1. https:// oder http:// entfernen
+                    let anzeigeText = originalLink.replace(/^https?:\/\//, '');
+                    
+                    // 2. Nach dem ersten verbleibenden "/" suchen
+                    let slashIndex = anzeigeText.indexOf('/');
+                    
+                    // 3. Wenn ein "/" gefunden wurde UND der Teil davor kurz genug ist (< 32 Zeichen)
+                    if (slashIndex !== -1 && slashIndex < 32) {
+                        anzeigeText = anzeigeText.substring(0, slashIndex);
+                    } 
+                    // 4. Falls kein Slash da ist oder der Hostname allein schon zu lang wäre, 
+                    // kürzen wir trotzdem bei 32 Zeichen für die Optik
+                    else if (anzeigeText.length > 32) {
+                        anzeigeText = anzeigeText.substring(0, 32) + "...";
+                    }
+
+                    ort += ` (Besprechungslink auf <a href="${originalLink}">${anzeigeText}</a>)`;
                 } else {
                     ort += ` (${ortObj.strLinkOderAdresse})`;
                 }
             }
-            
+                                    
             // Datum formatieren
             const inputDatum = document.getElementById('input-datum').value;
             const besprDatum = inputDatum ? inputDatum.split('-').reverse().join('.') : "Heute";
@@ -5933,10 +6088,28 @@
             const gewaehlterOrtName = document.getElementById('select-ort').value || "Unbekannt";
             let ortObj = arrBesprOrte.find(o => o.strName === gewaehlterOrtName);
             let ort = gewaehlterOrtName;
-            
+
             if (ortObj && ortObj.strLinkOderAdresse) {
                 if (ortObj.bolOnline && ortObj.strLinkOderAdresse.startsWith("http")) {
-                    ort += ` (<a href="${ortObj.strLinkOderAdresse}">${ortObj.strLinkOderAdresse}</a>)`;
+                    let originalLink = ortObj.strLinkOderAdresse;
+                    
+                    // 1. https:// oder http:// entfernen
+                    let anzeigeText = originalLink.replace(/^https?:\/\//, '');
+                    
+                    // 2. Nach dem ersten verbleibenden "/" suchen
+                    let slashIndex = anzeigeText.indexOf('/');
+                    
+                    // 3. Wenn ein "/" gefunden wurde UND der Teil davor kurz genug ist (< 32 Zeichen)
+                    if (slashIndex !== -1 && slashIndex < 32) {
+                        anzeigeText = anzeigeText.substring(0, slashIndex);
+                    } 
+                    // 4. Falls kein Slash da ist oder der Hostname allein schon zu lang wäre, 
+                    // kürzen wir trotzdem bei 32 Zeichen für die Optik
+                    else if (anzeigeText.length > 32) {
+                        anzeigeText = anzeigeText.substring(0, 32) + "...";
+                    }
+
+                    ort += ` (Besprechungslink <a href="${originalLink}">${anzeigeText}</a>)`;
                 } else {
                     ort += ` (${ortObj.strLinkOderAdresse})`;
                 }
