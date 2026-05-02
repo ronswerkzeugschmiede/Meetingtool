@@ -6,6 +6,25 @@
     <title>Besprechungsprotokoll Tool</title>
     
     <style>
+        #reihen-tabs div, #reihen-tabs .tab {
+            max-width: 150px;         /* Maximale Breite eines Tabs */
+            min-width: 80px;          /* Minimale Breite, damit Icons/Text Platz haben */
+            overflow: hidden;         /* Alles was übersteht, wird versteckt */
+            text-overflow: ellipsis;  /* Zeigt "..." bei zu langem Text an */
+            white-space: nowrap;      /* Verhindert Textumbruch innerhalb des Tabs */
+            padding: 8px 12px;
+            transition: all 0.2s;
+            flex-shrink: 0;           /* WICHTIG: Verhindert, dass Flexbox die Tabs zusammenquetscht */
+        }
+
+        /* Dezenten Scrollbalken für Chrome/Edge/Safari gestalten */
+        #reihen-tabs::-webkit-scrollbar {
+            height: 4px;              /* Sehr dünner Scrollbalken */
+        }
+        #reihen-tabs::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
         /* Löschfunktion für die Tabs */
         .tab-close-btn {
             margin-left: 10px;
@@ -554,19 +573,18 @@
 <body>
     <!-- 1. REIHE: Nur für die Tabs (Fixiert ganz oben) -->
     <div id="tab-leiste-global" style="position: fixed; top: 0; left: 0; width: 100%; display: flex; align-items: center; background: #eef2f5; border-bottom: 2px solid #ddd; z-index: 1001; height: 50px; padding: 0 20px;">
-        <div id="reihen-tabs" style="display: flex; gap: 5px; height: 100%; align-items: flex-end;">
-            <!-- Tabs werden hier eingefügt -->
+        <div id="reihen-tabs" style="display: flex; gap: 5px; height: 100%; align-items: flex-end; overflow-x: auto; overflow-y: hidden; white-space: nowrap; max-width: calc(100vw - 400px); scrollbar-width: thin; scrollbar-color: #ccc transparent; -webkit-overflow-scrolling: touch;">
         </div>
         <button onclick="neueReiheErstellen()" style="background: #28a745; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 15px;">+ Neu</button>
         
         <!-- Darkmode & Home Button (dezent rechts oben in der Tab-Leiste) -->
-        <div style="margin-left: auto; display: flex; gap: 8px;">
+        <div style="margin-left: auto; margin-right: 20px; display: flex; gap: 8px;">
             <button id="btn-home" onclick="ladeStammdatenInUI(); wechsleAnsicht('view-startmenue')" style="padding: 4px 10px; border-radius: 4px; cursor: pointer; background: #0056b3; color: white; border: none; font-size: 0.85em; display: none;">🏠 Startmenü</button>
             <button onclick="toggleDarkMode()" style="padding: 4px 10px; border-radius: 4px; cursor: pointer; background: #333; color: white; border: none; font-size: 0.85em;">🌙 Mode</button>
         </div>
     </div>
 
-    <!-- PLATZHALTER: Damit der Inhalt nicht unter der fixierten Tab-Leiste verschwindet -->
+    <!-- PLATZHALTER -->
     <div style="height: 60px;"></div>
 
     <div id="main-content-container" style="padding: 0 20px;">
@@ -1621,7 +1639,7 @@
         let bolDarkModeStart = false;
         let bolTimerSekundenAusblenden = false;
         let bolTimerBlinkenAus = false;
-        let strNamenszusatz = "none";        
+        let strNamenszusatz = "";        
         let strAblagepfad = "";
         let bolAutoHtml = false;
         let bolAutoJson = false;
@@ -1743,9 +1761,7 @@
         // VARIABLEN TEXT-VORLAGEN
         // ==========================================
         let strTplEinladung = "Hallo zusammen,\n\nhiermit lade ich euch zu unserer nächsten Besprechung \"{Titel}\" ein.\n\nDatum: {Datum}\nZeit: {Startzeit} - {Endzeit} Uhr\nOrt: {Ort}\n\n{Agenda}\n\nBitte gebt kurz Bescheid, falls ihr nicht teilnehmen könnt.\n\nViele Grüße";
-        
         let strTplErinnerung = "Hallo {Empfaenger},\n\nhier ist eine kurze Erinnerung an deine offenen Aufgaben aus unserer Besprechung \"{Titel}\":\n\n{Aufgaben}\n\nBitte gib mir ein kurzes Update oder hake die Punkte im nächsten Termin ab. Danke dir!\n\nViele Grüße";
-        
         let strTplProtokoll = "Hallo zusammen,\n\nhier ist das aktuelle Protokoll unserer Serie \"{Titel}\" vom {Datum}, {Startzeit} - {Endzeit} Uhr.\n\n{Protokoll}\n\nBitte um Rückmeldung, wenn etwas geändert oder ergänzt werden soll.\nDie nächste Besprechung findet am {NaechstesDatum} statt.\n\nViele Grüße";
         
         // Merkt sich, in welches Feld man zuletzt geklickt hat (für die Platzhalter-Buttons)
@@ -1817,16 +1833,20 @@
             arrAlleReihen.forEach((reihe, index) => {
                 const btn = document.createElement('button');
                 btn.className = `tab-button ${index === intAktiverReihenIndex ? 'active' : ''}`;
+
+                // Tooltip
+                btn.title = reihe.strTitel || "Unbenannt";
                 
                 // Titel-Text
                 const span = document.createElement('span');
                 span.innerText = reihe.strTitel || "Unbenannt";
+                span.title = reihe.strTitel || "Unbenannt";
                 span.onclick = () => {
                     sichereAktuelleReiheInLokalemArray();
                     ladeReiheAusLokalemArray(index);
                     aktualisiereTabLeiste();
                 };
-                
+
                 btn.appendChild(span);
 
                 // Lösch-Button (nur anzeigen wenn mehr als 1 Reihe existiert)
