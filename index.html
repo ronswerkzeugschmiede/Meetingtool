@@ -723,6 +723,14 @@
             <ul id="liste-teilnehmer-ui" style="margin-top: 10px; line-height: 1.8;">
                 </ul>
             <button onclick="neuerTeilnehmer()" style="margin-top: 10px;">+ Neuen Teilnehmer anlegen</button>
+            <div style="display: inline-flex; align-items: center; gap: 8px; margin-left: 15px; background: #f8f9fa; padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd;">
+                <span style="font-size: 0.85em;">Ø Stundensatz für alle aktiven Teilnehmer(€/h):</span>
+                <input type="number" 
+                    id="input-global-stundensatz" 
+                    value="100" 
+                    onchange="floatStandardStundensatz = parseFloat(this.value); speichereDatenInDB();" 
+                    style="width: 60px; border: 1px solid #ccc; padding: 2px;">
+            </div>
         </div>
 
         <div style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; background: white;">
@@ -804,9 +812,10 @@
                 <h2 style="margin: 0;">Anwesenheits-Historie & Analytics</h2>
                 <div id="historie-statistik-main" style="background: #eef2f5; padding: 5px 12px; border-radius: 6px; border: 1px solid #ced4da; font-weight: bold; color: #0056b3; font-size: 0.9em;">
                     Gesamtdauer: <span id="summe-dauer">0</span>
-                </div>
+                </div>                
             </div>
 
+            <!-- ZEILE 1: ZEIT & KOSTEN (Zentral im Blick) -->
             <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
                 <div style="flex: 1; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <div style="font-size: 0.7em; color: #666; text-transform: uppercase;">Termintreue (Soll/Ist)</div>
@@ -814,32 +823,23 @@
                         Start: <span id="stat-smiley-start">?</span> | Ende: <span id="stat-smiley-ende">?</span>
                     </div>
                 </div>
-                <div style="flex: 1; background: #fff; border: 1px solid #c6f6d5; padding: 8px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 0.7em; color: #2f855a; text-transform: uppercase;">🏆 Kern-Team</div>
-                    <div id="stat-kernteam" style="font-weight: bold; font-size: 0.9em; color: #22543d;">-</div>
-                </div>
-                <div style="flex: 1; background: #fff; border: 1px solid #fed7d7; padding: 8px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 0.7em; color: #c53030; text-transform: uppercase;">👻 Ghosting</div>
-                    <div id="stat-ghosting" style="font-weight: bold; font-size: 0.9em; color: #742a2a;">-</div>
+                <div style="flex: 2; background: #fff; border: 1px solid #feb2b2; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #c53030; text-transform: uppercase; margin-bottom: 2px;">💰 Besprechungs-Invest</div>
+                    <div style="display: flex; align-items: baseline; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <!-- Gesamtkosten prominent -->
+                        <span id="stat-kosten-gesamt" style="font-weight: bold; font-size: 1.2em; color: #9b2c2c;">0,00 €</span>
+                        <!-- Durchschnitt kleiner dahinter -->
+                        <span id="stat-kosten-monat" style="font-size: 0.85em; color: #e53e3e; font-weight: normal;">(Ø 0,00 € / Monat)</span>
+                    </div>
                 </div>
             </div>
 
+            <!-- ZEILE 2: EFFIZIENZ & WORKFLOW -->
             <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
                 <div style="flex: 1; background: #fff; border: 1px solid #bee3f8; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #2b6cb0; text-transform: uppercase;">📊 Effizienz</div>
                     <div id="stat-effizienz" style="font-weight: bold; font-size: 0.9em; color: #2c5282;">-</div>
                 </div>
-                <div style="flex: 1; background: #fff; border: 1px solid #e9d8fd; padding: 8px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 0.7em; color: #6b46c1; text-transform: uppercase;">🔨 Aufgaben-König</div>
-                    <div id="stat-aufgabe-top" style="font-weight: bold; font-size: 0.9em; color: #44337a;">-</div>
-                </div>
-                <div style="flex: 1; background: #fff; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
-                    <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">💡 Mix (I/A/E)</div>
-                    <div id="stat-mix" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
                 <div style="flex: 1; background: #fff; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
                     <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">⏱ Erledigungs-Dauer</div>
                     <div id="stat-liegezeit" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
@@ -848,16 +848,21 @@
                     <div style="font-size: 0.7em; color: #4a5568; text-transform: uppercase;">✅ Erledigungs-Quote</div>
                     <div id="stat-quote" style="font-weight: bold; font-size: 0.9em; color: #2d3748;">-</div>
                 </div>
-                <div id="stat-fazit" style="flex: 1; background: #fdf2f2; border: 1px solid #fbd3d3; padding: 8px; border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.85em; font-weight: bold; color: #9b2c2c;">
+            </div>
+
+            <!-- ZEILE 3: MIX & FAZIT -->
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 900px; margin-bottom: 10px;">
+                <div style="flex: 1; background: #fff; border: 1px solid #feebc8; padding: 8px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 0.7em; color: #c05621; text-transform: uppercase;">💡 Mix (I/A/E)</div>
+                    <div id="stat-mix" style="font-weight: bold; font-size: 0.9em; color: #7b341e;">-</div>
+                </div>
+                <div id="stat-fazit" style="flex: 2; background: #fdf2f2; border: 1px solid #fbd3d3; padding: 8px; border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.85em; font-weight: bold; color: #9b2c2c;">
                     Lädt...
                 </div>
             </div>
-            
-            <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #777; text-align: center; max-width: 850px;">
-                Hier siehst du, wer bei welcher Besprechung anwesend war. Falls du das Protokoll nachträglich verschickst, greift das Tool auf diese Daten zurück. Du kannst Namen und Zeiten hier auch manuell anpassen (Namen durch Komma getrennt eintragen).
-            </p>
         </div>
 
+        <!-- TABELLE DER BESPRECHUNGEN -->
         <div style="overflow-x: auto; background: white; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 15px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">
                 <thead style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
@@ -866,7 +871,7 @@
                         <th style="padding: 5px 10px; text-align: left; width: 90px;">Datum</th>
                         <th style="padding: 5px 10px; text-align: left; width: 80px;">Start</th>
                         <th style="padding: 5px 10px; text-align: left; width: 80px;">Ende</th>
-                        <th style="padding: 5px 10px; text-align: left; width: 70px;">Dauer</th>
+                        <th style="padding: 5px 10px; text-align: left; width: 90px;">Dauer</th>
                         <th style="padding: 5px 10px; text-align: left;">Teilnehmer (Kompakt)</th>
                     </tr>
                 </thead>
@@ -874,11 +879,42 @@
             </table>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <button onclick="speichereHistorieUI()" style="background: #28a745; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px; font-weight: bold;">Speichern & Zurück</button>
-            <button onclick="wechsleAnsicht('view-startmenue')" style="background: #6c757d; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px;">Abbrechen</button>
+        <!-- NEU: AUFKLAPPBARE PERSONEN-ANALYTICS -->
+        <details style="width: 100%; max-width: 900px; margin: 20px auto;  border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+            <summary style="padding: 12px 20px; cursor: pointer; font-weight: bold; color: #495057; list-style: none; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee;">
+                <span>👤 Personen-spezifische Rankings (Kern-Team, Ghosting, Aufgaben)</span>
+                <span style="font-size: 0.8em; color: #0056b3;">[Klicken zum Aufklappen]</span>
+            </summary>
+            
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <!-- Kern-Team (Breit) -->
+                <div style="background: #f0fff4; border: 1px solid #c6f6d5; padding: 12px; border-radius: 6px;">
+                    <div style="font-size: 0.75em; color: #2f855a; text-transform: uppercase; margin-bottom: 5px; font-weight: bold;">🏆 Kern-Team (Höchste Anwesenheit)</div>
+                    <div id="stat-kernteam" style="font-weight: bold; font-size: 1em; color: #22543d; line-height: 1.4;">-</div>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <!-- Ghosting (Breiter als vorher) -->
+                    <div style="flex: 2; background: #fff5f5; border: 1px solid #fed7d7; padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.75em; color: #c53030; text-transform: uppercase; margin-bottom: 5px; font-weight: bold;">👻 Ghosting (Niedrige Quote)</div>
+                        <div id="stat-ghosting" style="font-weight: bold; font-size: 1em; color: #742a2a; line-height: 1.4;">-</div>
+                    </div>
+                    <!-- Aufgaben-König -->
+                    <div style="flex: 1; background: #faf5ff; border: 1px solid #e9d8fd; padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.75em; color: #6b46c1; text-transform: uppercase; margin-bottom: 5px; font-weight: bold;">🔨 Aufgaben-König</div>
+                        <div id="stat-aufgabe-top" style="font-weight: bold; font-size: 1em; color: #44337a;">-</div>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="speichereHistorieUI()" style="background: #28a745; color: white; border: none; padding: 8px 20px; cursor: pointer; border-radius: 4px; font-weight: bold;">Speichern & Zurück</button>
+            <button onclick="wechsleAnsicht('view-startmenue')" style="background: #6c757d; color: white; border: none; padding: 8px 20px; cursor: pointer; border-radius: 4px;">Abbrechen</button>
         </div>
-    </div>   
+    </div>        
+
+   
 
     <div id="view-projekte" class="ansicht">
         <h2>Projektverwaltung</h2>
@@ -1566,6 +1602,7 @@
         let arrListeAktiveTeilnehmer = []; // Alle aktiven Teilnehmer (zum Abhaken)
         let arrAnwesende = []; // Tatsächlich anwesende Teilnehmer der aktuellen Sitzung
         let arrAbwesende = []; // Speichert die Namen der Fehlenden für den Mail-Verteiler
+        let floatStandardStundensatz = 100.00; // Neuer fiktiver Stundensatz
         let arrListeProtokollanten = []; // Aktive Teilnehmer für das Dropdown "Protokollführer"
         let strNameProtokollant = ""; // Ausgewählter Protokollführer
         let arrNaechsteTermine = []; // Speichert die nächsten 6 Termine (Format: YYYY-MM-DD)
@@ -3373,6 +3410,48 @@
             };
         }
 
+        function speichereHistorieUI() {
+            console.log("Speichervorgang der Historie gestartet...");
+
+            if (!arrAnwesenheitsHistorie) {
+                console.error("Fehler: arrAnwesenheitsHistorie ist nicht definiert.");
+                return;
+            }
+
+            arrAnwesenheitsHistorie.forEach((eintrag) => {
+                const id = eintrag.intBesprNr;
+
+                // Referenzen auf die DOM-Elemente (Inputs und Textareas)
+                const startInput = document.getElementById(`hist-start-${id}`);
+                const endeInput = document.getElementById(`hist-ende-${id}`);
+                const dauerInput = document.getElementById(`hist-dauer-${id}`);
+                const anwInput = document.getElementById(`hist-anwesend-${id}`);
+                const abwInput = document.getElementById(`hist-abwesend-${id}`);
+
+                // 1. Teilnehmer-Listen aus den neuen Textareas übernehmen
+                if (anwInput && abwInput) {
+                    eintrag.arrAnwesende = anwInput.value.split(',').map(s => s.trim()).filter(s => s !== "");
+                    eintrag.arrAbwesende = abwInput.value.split(',').map(s => s.trim()).filter(s => s !== "");
+                }
+
+                // 2. Zeitwerte übernehmen
+                if (startInput) eintrag.datIstStartZeit = startInput.value;
+                if (endeInput) eintrag.datIstEndeZeit = endeInput.value;
+                if (dauerInput) eintrag.intGesamtdauerOhnePause = parseInt(dauerInput.value) || 0;
+            });
+
+            // 3. In das globale Array sichern (für Multi-Reihen-System)
+            if (typeof sichereAktuelleReiheInLokalemArray === "function") {
+                sichereAktuelleReiheInLokalemArray();
+            }
+
+            // 4. In Datenbank schreiben
+            speichereDatenInDB();
+
+            alert("Historie erfolgreich aktualisiert.");
+            wechsleAnsicht('view-startmenue');
+        }
+
         function oeffneAnwesenheitsHistorie() {
             const container = document.getElementById('liste-historie-ui');
             const summenAnzeige = document.getElementById('summe-dauer');
@@ -3401,11 +3480,11 @@
             const tStats = berechneTeilnehmerStatistik();
             if (tStats.length > 0) {
                 // Kern-Team (Top 2)
-                kernAnzeige.innerText = tStats.slice(0, 2).map(p => p.name).join(", ");
+                kernAnzeige.innerText = tStats.slice(0, 5).map(p => p.name).join(", ");
                 
                 // Ghosting (Leute unter 50% Quote, sortiert nach schlechtester Quote)
                 const ghosts = tStats.filter(p => p.quote < 50).sort((a,b) => a.quote - b.quote);
-                ghostAnzeige.innerText = ghosts.length > 0 ? ghosts.slice(0, 2).map(p => p.name).join(", ") : "Niemand :)";
+                ghostAnzeige.innerText = ghosts.length > 0 ? ghosts.slice(0, 5).map(p => p.name).join(", ") : "Niemand :)";
             }
 
             // 3. Inhalts-Statistik berechnen & anzeigen
@@ -3444,6 +3523,7 @@
                     fazitElement.style.background = "#fff";
                     fazitElement.style.color = "#7b341e";
                 }
+                aktualisiereKostenStatistik();
             }
 
             // 3. Tabelle zeichnen (mit Dubletten-Check)
@@ -3467,15 +3547,25 @@
                 tr.innerHTML = `
                     <td style="padding: 4px 10px; font-weight: bold;">${nr}</td>
                     <td style="padding: 4px 10px;">${anzeigeDatum}</td>
-                    <td style="padding: 4px 10px;"><input type="time" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
-                    <td style="padding: 4px 10px;"><input type="time" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
-                    <td style="padding: 4px 10px;"><input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 45px; border: 1px solid #ddd; font-size: 0.9em;"></td>
+                    <td style="padding: 4px 10px;"><input type="time" onchange="berechneHistorieDauer(${eintrag.intBesprNr})" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
+                    <td style="padding: 4px 10px;"><input type="time" onchange="berechneHistorieDauer(${eintrag.intBesprNr})" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
+                    <td style="padding: 4px 10px;"><input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 60px; border: 1px solid #ddd; font-size: 0.9em;"></td>
                     <td style="padding: 4px 10px;">
-                        <div style="display: flex; align-items: center; gap: 5px;">
-                            <span style="color: green; font-weight: bold;">A:</span>
-                            <input type="text" id="hist-anwesend-${eintrag.intBesprNr}" value="${eintrag.arrAnwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.8em;">
-                            <span style="color: #dc3545; font-weight: bold; margin-left: 5px;">V:</span>
-                            <input type="text" id="hist-abwesend-${eintrag.intBesprNr}" value="${eintrag.arrAbwesende.join(', ')}" style="flex-grow: 1; border: 1px solid #eee; padding: 2px; font-size: 0.8em;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; align-items: flex-start; gap: 5px;">
+                                <span style="color: green; font-weight: bold; width: 15px; margin-top: 3px;">A:</span>
+                                <textarea id="hist-anwesend-${eintrag.intBesprNr}" 
+                                        class="input-tabelle" 
+                                        style="flex-grow: 1; min-height: 40px; resize: vertical; font-size: 0.85em; text-align: left; padding: 4px;"
+                                >${eintrag.arrAnwesende.join(', ')}</textarea>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 5px;">
+                                <span style="color: #dc3545; font-weight: bold; width: 15px; margin-top: 3px;">V:</span>
+                                <textarea id="hist-abwesend-${eintrag.intBesprNr}" 
+                                        class="input-tabelle" 
+                                        style="flex-grow: 1; min-height: 40px; resize: vertical; font-size: 0.85em; text-align: left; padding: 4px;"
+                                >${eintrag.arrAbwesende.join(', ')}</textarea>
+                            </div>
                         </div>
                     </td>
                 `;
@@ -3490,37 +3580,50 @@
 
             wechsleAnsicht('view-historie-anwesenheit');
         }
-        
-        
 
-        
-       
-        function speichereHistorieUI() {
-            arrAnwesenheitsHistorie.forEach((eintrag) => {
-                let anwInput = document.getElementById(`hist-anwesend-${eintrag.intBesprNr}`);
-                let abwInput = document.getElementById(`hist-abwesend-${eintrag.intBesprNr}`);
+        function aktualisiereKostenStatistik() {
+            let gesamtKosten = 0;
+            let monateMap = {};
+
+            arrAnwesenheitsHistorie.forEach(e => {
+                const dauerStd = (parseInt(e.intGesamtdauerOhnePause) || 0) / 60;
+                const anzahlAnwesende = Array.isArray(e.arrAnwesende) ? e.arrAnwesende.length : 0;
+                const meetingKosten = dauerStd * anzahlAnwesende * floatStandardStundensatz;
                 
-                // Zeit-Inputs auslesen
-                let startInput = document.getElementById(`hist-start-${eintrag.intBesprNr}`);
-                let endeInput = document.getElementById(`hist-ende-${eintrag.intBesprNr}`);
-                let dauerInput = document.getElementById(`hist-dauer-${eintrag.intBesprNr}`);
-                
-                if (anwInput && abwInput) {
-                    eintrag.arrAnwesende = anwInput.value.split(',').map(s => s.trim()).filter(s => s !== "");
-                    eintrag.arrAbwesende = abwInput.value.split(',').map(s => s.trim()).filter(s => s !== "");
+                gesamtKosten += meetingKosten;
+
+                if (e.strDatum && e.strDatum.includes("-")) {
+                    const monatKey = e.strDatum.substring(0, 7); 
+                    monateMap[monatKey] = (monateMap[monatKey] || 0) + meetingKosten;
                 }
-
-                // Zeitwerte im Objekt aktualisieren
-                if (startInput) eintrag.datIstStartZeit = startInput.value;
-                if (endeInput) eintrag.datIstEndeZeit = endeInput.value;
-                if (dauerInput) eintrag.intGesamtdauerOhnePause = parseInt(dauerInput.value) || 0;
             });
 
-            speichereDatenInDB();
-            alert("Historie erfolgreich aktualisiert.");
-            wechsleAnsicht('view-startmenue');
-        }
+            const anzahlMonate = Object.keys(monateMap).length || 1;
+            const schnitt = gesamtKosten / anzahlMonate;
 
+            const elGesamt = document.getElementById('stat-kosten-gesamt');
+            const elMonat = document.getElementById('stat-kosten-monat');
+
+            if (elGesamt) {
+                // Sonderfall: Ehrenamtlich bei Stundensatz 0
+                if (floatStandardStundensatz === 0) {
+                    elGesamt.innerText = "Ehrenamtlich";
+                    elGesamt.style.color = "#2f855a"; // Ein freundliches Grün
+                } else {
+                    elGesamt.innerText = gesamtKosten.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                    elGesamt.style.color = ""; // Zurück zur Standardfarbe (z.B. Dunkelrot)
+                }
+            }
+
+            if (elMonat) {
+                if (floatStandardStundensatz === 0) {
+                    elMonat.innerText = "(Keine Kosten)";
+                } else {
+                    elMonat.innerText = `(Ø ${schnitt.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })} / Monat)`;
+                }
+            }
+        }
+       
         function updateHistorie(index, feld, wert) {
             arrAnwesenheitsHistorie[index][feld] = wert;
             speichereDatenInDB(); // Sofort lokal sichern
@@ -5514,6 +5617,8 @@
 
             wechsleAnsicht('view-startmenue');
         }
+
+        
         
         // ==========================================
         // FUNKTIONEN: Export & Protokollerstellung
@@ -6467,6 +6572,40 @@
             // TODO für später: arrListeTeilnehmer in IndexedDB/JSON speichern!
             alert("Teilnehmer gespeichert!");
         }
+
+        function berechneGeplanteKosten() {
+            const start = document.getElementById('input-startzeit').value; // z.B. strGeplanteStartzeit
+            const ende = document.getElementById('input-endezeit').value;   // z.B. strGeplanteEndzeit
+            
+            // Dauer in Stunden berechnen
+            const [hS, mS] = start.split(':').map(Number);
+            const [hE, mE] = ende.split(':').map(Number);
+            const dauerStd = (hE * 60 + mE - (hS * 60 + mS)) / 60;
+            
+            const anzahlTeilnehmer = arrListeAktiveTeilnehmer.filter(t => t.bolAktiv).length;
+            const kosten = dauerStd * anzahlTeilnehmer * floatStandardStundensatz;
+            
+            document.getElementById('ui-geplante-kosten').innerText = kosten.toFixed(2) + " €";
+        }
+
+        function berechneHistorieDauer(besprNr) {
+            const startVal = document.getElementById(`hist-start-${besprNr}`).value;
+            const endeVal = document.getElementById(`hist-ende-${besprNr}`).value;
+            const dauerInput = document.getElementById(`hist-dauer-${besprNr}`);
+
+            if (startVal && endeVal) {
+                const [hS, mS] = startVal.split(':').map(Number);
+                const [hE, mE] = endeVal.split(':').map(Number);
+                
+                let differenz = (hE * 60 + mE) - (hS * 60 + mS);
+                if (differenz < 0) differenz = 0; // Falls Ende vor Start
+                
+                dauerInput.value = differenz;
+            }
+        }
+
+
+
         // ==========================================
         // FUNKTIONEN: Organisationen & Funktionen verwalten
         // ==========================================
@@ -6689,6 +6828,7 @@
                 bolEntscheidungenImmerMitschicken: bolEntscheidungenImmerMitschicken,
                 strWiederholung: strWiederholung,
                 intWiederholungTage: intWiederholungTage,
+                floatStandardStundensatz: floatStandardStundensatz,
                 strBetreffzeilentext: strBetreffzeilentext,
                 // 2. Laufzeit
                 intAktBesprNr: intAktBesprNr,
@@ -6736,6 +6876,7 @@
             if (paket.strOrgaAdresse !== undefined) strOrgaAdresse = paket.strOrgaAdresse;
             if (paket.strGeplanteStartzeit !== undefined) strGeplanteStartzeit = paket.strGeplanteStartzeit;
             if (paket.strGeplanteEndzeit !== undefined) strGeplanteEndzeit = paket.strGeplanteEndzeit;
+            if (paket.floatStandardStundensatz !== undefined) floatStandardStundensatz = paket.floatStandardStundensatz;
 
             if (paket.strAktuellerModus !== undefined) strAktuellerModus = paket.strAktuellerModus;
             if (paket.bolOhneWochenenden !== undefined) bolOhneWochenenden = paket.bolOhneWochenenden;
@@ -6800,6 +6941,10 @@
             document.getElementById('ui-titel').innerText = strTitel;
             document.getElementById('ui-orga-name').innerText = strOrgaName;
             ladeStammdatenInUI(); // Baut alle Dropdowns und Listen neu auf!
+            const inputStundensatz = document.getElementById('input-global-stundensatz');
+            if (inputStundensatz) {
+                inputStundensatz.value = floatStandardStundensatz;
+            }
 
             // Prüfen, ob "Immer im Darkmode starten" aktiviert ist
             if (bolDarkModeStart) bolDarkMode = true;
