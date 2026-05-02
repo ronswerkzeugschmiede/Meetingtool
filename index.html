@@ -86,6 +86,22 @@
         }
         .dark-mode .danger-zone { background: #2d1a1a; border-color: #742a2a; }
 
+        /* Aufgaben Ablauf-Warnung */
+        .termin-ok { background-color: #c6f6d5 !important; color: #22543d !important; } /* Grün */
+        .termin-warnung { background-color: #feebc8 !important; color: #744210 !important; } /* Gelb */
+        .termin-gefahr { background-color: #fed7d7 !important; color: #822727 !important; } /* Rot */
+
+        .dark-mode .termin-ok { background-color: #22543d !important; color: #c6f6d5 !important; }
+        .dark-mode .termin-warnung { background-color: #744210 !important; color: #feebc8 !important; }
+        .dark-mode .termin-gefahr { background-color: #822727 !important; color: #fed7d7 !important; }
+
+        /* Klasse für das überschriebene Zieldatum */
+        .termin-veraltet {
+            text-decoration: line-through !important;
+            opacity: 0.5 !important;
+            font-style: italic;
+        }
+
         /* Grundlegendes Styling */
         body {
             font-family: Arial, sans-serif;
@@ -1393,8 +1409,6 @@
                 <div style="font-size: 0.85em; color: #555; margin-top: 0; padding: 2px 0 0 0; background-color: transparent; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                     <span style="opacity: 0.8;"><b>Schnelleingabe zum Einfügen</b></span>
                     
-                    <span style="color: #0056b3;"><b>#</b> Hashtag</span>
-                    <span style="color: #ccc;">|</span>
                     <span style="color: #0056b3;"><b>##</b> Kat/Projekt</span>
                     <span style="color: #ccc;">|</span>
                     <span style="color: #0056b3;"><b>###</b> Verlinkung</span>
@@ -1409,29 +1423,34 @@
                     
                     <span style="color: #666;"><b>@@</b> Datum</span>
                     <span> (+ Leertaste)</span>
+                    
+                    <span style="color: #ccc;">|</span>
+                    <span style="color: #0056b3;"><b>#</b> Hashtags werden unterstützt</span>
+
                 </div>
 
                 <div id="bereich-aufgabe" style="display: none; background: #f8f9fa; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
-                    <div style="display: flex; gap: 15px;">
+                    <div style="display: flex; gap: 15px; align-items: flex-end;">
                         
                         <div style="flex: 1;">
                             <label style="display: block; margin-bottom: 5px;">Zieldatum:</label>
-                            <input type="date" id="input-zieldatum" style="margin-bottom: 0;">
+                            <input type="date" id="input-zieldatum" onchange="aktualisiereTerminWarnung()" style="margin-bottom: 0; width: 100%;">
                         </div>
+                        
                         <div style="flex: 1;">
                             <label style="display: block; margin-bottom: 5px;">Akt. Zieldatum:</label>
-                            <input type="date" id="input-akt-zieldatum" style="margin-bottom: 0;">
+                            <input type="date" id="input-akt-zieldatum" onchange="aktualisiereTerminWarnung()" style="margin-bottom: 0; width: 100%;">
                         </div>
 
                         <div style="flex: 1;">
-                            <label style="display: block; margin-bottom: 5px;">Erledigt / am:</label>
+                            <label style="display: block; margin-bottom: 5px;">Erledigt / am: <span id="termin-status-emoji">🟢</span></label>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="check-erledigt" onchange="toggleErledigt()" style="margin: 0; width: 22px; height: 22px; cursor: pointer;" title="Als erledigt markieren">
-                                <input type="date" id="input-erledigt-datum" onchange="syncErledigtCheckbox()" style="margin-bottom: 0; flex-grow: 1;">
+                                <input type="checkbox" id="check-erledigt" onchange="toggleErledigt(); aktualisiereTerminWarnung();" style="margin: 0; width: 22px; height: 22px; cursor: pointer;">
+                                <input type="date" id="input-erledigt-datum" onchange="syncErledigtCheckbox(); aktualisiereTerminWarnung();" style="margin-bottom: 0; flex-grow: 1;">
                             </div>
                         </div>
                     </div>
-                </div>               
+                </div>           
 
                 <div id="bereich-multiprojekt" style="display: none; background: #f1f8fa; margin-top: 8px; margin-bottom: 15px; border-radius: 5px;">
                     <label id="label-projekt" style="font-weight: bold; display: block; margin-bottom: 5px;">Projekt:</label>
@@ -2030,6 +2049,23 @@
             wechsleAnsicht('view-liste');
         }
 
+        function holeTerminEmoji(datumStr) {
+            if (!datumStr) return "";
+            
+            const heute = new Date();
+            heute.setHours(0,0,0,0);
+            
+            const ziel = new Date(datumStr);
+            const naechste = new Date();
+            // Nutzt deine bestehende Variable für den Rhythmus
+            naechste.setDate(naechste.getDate() + (typeof intWiederholungTage !== 'undefined' ? intWiederholungTage : 7));
+            naechste.setHours(0,0,0,0);
+
+            if (ziel < heute) return "🚨";
+            if (ziel <= naechste) return "⏳";
+            return "🟢";
+        }
+
         function aktualisiereKombinierteListe() {
             const listElement = document.getElementById('ui-kombinierte-punkte-liste');
             listElement.innerHTML = "";
@@ -2099,8 +2135,18 @@
                 if (punkt.strName) zusatzInfos.push(`👤 ${punkt.strName}`);
                 if (punkt.strKategorie) zusatzInfos.push(`🏷️ ${punkt.strKategorie}`);
                 if (punkt.strProjekt) zusatzInfos.push(`📁 ${punkt.strProjekt}`);
-                if (punkt.datZieldatum) zusatzInfos.push(`🎯 Ziel: ${formatiereDatum(punkt.datZieldatum)}`);
-                if (punkt.datErledigungsdatum) zusatzInfos.push(`✅ Erledigt: ${formatiereDatum(punkt.datErledigungsdatum)}`);
+
+                // Prüfung, ob ein aktualisiertes Datum vorliegt
+                let relevantesZiel = punkt.datAktuellesZieldatum || punkt.datZieldatum;
+
+                if (relevantesZiel && punkt.strTyp === "Aufgabe" && !punkt.datErledigungsdatum) {
+                    // Nutze die Hilfsfunktion für das Emoji (siehe unten)
+                    const emoji = holeTerminEmoji(relevantesZiel);
+                    zusatzInfos.push(`🎯 Ziel: ${formatiereDatum(relevantesZiel)} ${emoji}`);
+                }
+                console.log("Datum gewählt: " + relevantesZiel);
+
+                if (punkt.datErledigungsdatum) zusatzInfos.push(`✅ Erledigt: ${formatiereDatum(punkt.datErledigungsdatum)}`);                
 
                 let contentDiv = document.createElement('div');
                 contentDiv.style.flexGrow = "1";
@@ -3780,6 +3826,93 @@
                 // Wenn Haken entfernt wird, Datum löschen
                 dateInput.value = "";
             }
+        }
+
+        function aktualisiereTerminWarnung() {
+            const zielInput = document.getElementById('input-zieldatum');
+            const aktZielInput = document.getElementById('input-akt-zieldatum');
+            const erledigtDatum = document.getElementById('input-erledigt-datum').value;
+            const statusEmoji = document.getElementById('termin-status-emoji');
+
+            // 1. Reset aller Zustände
+            resetFarbe(zielInput);
+            resetFarbe(aktZielInput);
+            zielInput.classList.remove('termin-veraltet');
+
+            // 2. Visuelle Markierung: Wenn ein Akt. Zieldatum da ist, altes Feld durchstreichen
+            if (aktZielInput.value !== "") {
+                zielInput.classList.add('termin-veraltet');
+            }
+
+            // 3. Sonderfall Erledigt: Beendet die Warnlogik
+            if (erledigtDatum !== "") {
+                if (zielInput.value) setzeTerminFarbe(zielInput, "ok");
+                if (aktZielInput.value) setzeTerminFarbe(aktZielInput, "ok");
+                if (statusEmoji) statusEmoji.innerText = "✅";
+                return;
+            }
+
+            // 4. Warn-Logik
+            const heute = new Date();
+            heute.setHours(0,0,0,0);
+            
+            const naechsteBesprechung = new Date();
+            naechsteBesprechung.setDate(naechsteBesprechung.getDate() + intWiederholungTage);
+            naechsteBesprechung.setHours(0,0,0,0);
+
+            // Hilfsfunktion zur Statusermittlung
+            const holeStatus = (dateStr) => {
+                if (!dateStr) return null;
+                const d = new Date(dateStr);
+                d.setHours(0,0,0,0);
+                if (d < heute) return "gefahr";
+                if (d <= naechsteBesprechung) return "warnung";
+                return "ok";
+            };
+
+            // Status für beide Felder einzeln berechnen
+            const statusZiel = holeStatus(zielInput.value);
+            const statusAkt = holeStatus(aktZielInput.value);
+
+            // Farben setzen (Nur wenn Wert vorhanden)
+            if (statusZiel) setzeTerminFarbe(zielInput, statusZiel);
+            if (statusAkt) setzeTerminFarbe(aktZielInput, statusAkt);
+
+            // 5. Emoji-Logik: Das aktuellste Datum gewinnt für das Emoji
+            const finalerStatus = statusAkt || statusZiel;
+            const emojis = { gefahr: "🚨", warnung: "⏳", ok: "🟢" };
+            
+            if (statusEmoji) {
+                statusEmoji.innerText = finalerStatus ? emojis[finalerStatus] : "⚪";
+            }
+        }
+
+        // Hilfsfunktionen (bleiben gleich)
+        function resetFarbe(element) {
+            element.classList.remove('termin-ok', 'termin-warnung', 'termin-gefahr');
+        }
+
+        function setzeTerminFarbe(element, status) {
+            if (status) element.classList.add('termin-' + status);
+        }     
+
+
+        function prüfeTypAuswahl() {
+            // ... dein bestehender Code ...
+            if (typ === "Aufgabe") {
+                // ... (Automatisches Zieldatum setzen) ...
+                
+                // NEU: Warnfarben direkt berechnen
+                aktualisiereTerminWarnung();
+            }
+        }
+
+        // Hilfsfunktion zum Setzen der Klassen
+        function setzeTerminFarbe(element, status) {
+            element.classList.remove('termin-ok', 'termin-warnung', 'termin-gefahr');
+            if (status === "ok") element.classList.add('termin-ok');
+            if (status === "warnung") element.classList.add('termin-warnung');
+            if (status === "gefahr") element.classList.add('termin-gefahr');
         }
 
         // Wird aufgerufen, wenn man das Datum manuell ändert (oder ein Punkt geladen wird)
@@ -5726,9 +5859,11 @@
 
                 // --- WER & WANN ---
                 if (punkt.strName) strPunkte += `    👤 Verantwortlich: ${punkt.strName}\n`;
-                
-                let zDatum = punkt.datZieldatum ? new Date(punkt.datZieldatum).toLocaleDateString('de-DE') : "";
-                
+
+                // bevorzugt das datAktuellesZieldatum, falls leer dann datZieldatum
+                let relevantesDatum = punkt.datAktuellesZieldatum || punkt.datZieldatum;
+                let zDatum = relevantesDatum ? new Date(relevantesDatum).toLocaleDateString('de-DE') : "";  
+                               
                 if (punkt.datErledigungsdatum) {
                     const eDatum = new Date(punkt.datErledigungsdatum).toLocaleDateString('de-DE');
                     if (zDatum !== "") zDatum = `Ziel: ${zDatum} | `; 
@@ -5883,8 +6018,10 @@
                     if (punkt.strName) {
                         colWerWann += `<b>👤 ${punkt.strName}</b>`;
                     }
-                    
-                    let zDatum = punkt.datZieldatum ? new Date(punkt.datZieldatum).toLocaleDateString('de-DE') : "";
+
+                    // bevorzugt das datAktuellesZieldatum, falls leer dann datZieldatum
+                    let relevantesDatum = punkt.datAktuellesZieldatum || punkt.datZieldatum;
+                    let zDatum = relevantesDatum ? new Date(relevantesDatum).toLocaleDateString('de-DE') : "";                  
                     
                     if (punkt.datErledigungsdatum) {
                         const eDatum = new Date(punkt.datErledigungsdatum).toLocaleDateString('de-DE');
@@ -6050,9 +6187,11 @@
                     if (punkt.strName) {
                         colWerWann += `<b>👤 ${punkt.strName}</b>`;
                     }
-                    
-                    let zDatum = punkt.datZieldatum ? new Date(punkt.datZieldatum).toLocaleDateString('de-DE') : "";
-                    
+
+                    // bevorzugt das datAktuellesZieldatum, falls leer dann datZieldatum
+                    let relevantesDatum = punkt.datAktuellesZieldatum || punkt.datZieldatum;
+                    let zDatum = relevantesDatum ? new Date(relevantesDatum).toLocaleDateString('de-DE') : "";  
+                                       
                     if (punkt.datErledigungsdatum) {
                         const eDatum = new Date(punkt.datErledigungsdatum).toLocaleDateString('de-DE');
                         if (zDatum !== "") zDatum += "<br>"; 
