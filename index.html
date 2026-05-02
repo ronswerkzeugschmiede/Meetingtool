@@ -179,6 +179,24 @@
             margin-bottom: -2px; /* Schließt bündig mit dem Container ab */
         }
 
+        .tab-button span {
+            display: inline-block;
+            max-width: 120px;       /* Deine gewünschte Max-Breite */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        /* Während aktiver Besprechungen wird die Tableiste versteckt */
+        .tabs-versteckt {
+            display: none !important;
+        }
+        /* Während aktiver Besprechungen wird der Startmenü-Button versteckt */
+        .nav-versteckt {
+            display: none !important;
+        }
+
         /* Darkmode Korrektur */
         .dark-mode .tab-button {
             background: #333;
@@ -1375,7 +1393,6 @@
     <div id="view-eingabefenster" class="ansicht">
         <h2 style="display: flex; justify-content: space-between; align-items: center;">
             <span>Besprechungspunkt: <span id="ui-akt-punkt">101</span></span>
-            <span id="ui-akt-titel" style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center;"></span>
         </h2>
 
         <div style="background: #0056b3; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); overflow: hidden;">
@@ -1423,7 +1440,7 @@
                         <button onclick="aendereTextfeldGroesse(2)" style="padding: 2px 8px; margin: 0 0 0 5px; font-size: 0.9em; cursor: pointer; border-radius: 4px;" title="Schrift vergrößern">A+</button>
                     </div>
                 </div>
-                <textarea id="input-beschreibung" rows="12" style="width: 100%; font-size: 18px;" spellcheck="true" lang="de-DE" oninput="ueberwacheTexteingabe(event)"></textarea>
+                <textarea id="input-beschreibung" rows="8" style="width: 100%; font-size: 18px;" spellcheck="true" lang="de-DE" oninput="ueberwacheTexteingabe(event)"></textarea>
                 <div style="font-size: 0.85em; color: #555; margin-top: 0; padding: 2px 0 0 0; background-color: transparent; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                     <span style="opacity: 0.8;"><b>Schnelleingabe zum Einfügen</b></span>
                     
@@ -1610,9 +1627,9 @@
         // ==========================================
         // KONSTANTEN
         // ==========================================
-        const strDateiversion = "0.52";
+        const strDateiversion = "0.53";
         const strAutor = "Ronald Richter";
-        const strInfotext = "Hier steht die Programminfo. Dieses Tool dient der Erfassung von Besprechungsserien.";
+        const strInfotext = "Hier steht die Programminfo. Dieses Tool dient der Vorbereitung und Durchführung von von Besprechungsserien.";
         const arrTypen = ["Agenda", "Info", "Aufgabe", "Entscheidung"];
         const arrWiederholungen = ["täglich", "wöchentlich", "14-tägig", "monatlich", "zweimonatlich", "vierteljährlich", "halbjährlich", "jährlich"];
 
@@ -1623,31 +1640,31 @@
         let arrAlleReihen = [];
         let strOrdnerpfad = ""; // Pfad der HTML-Datei (wird dynamisch ermittelt, wo möglich)
         let arrModus = ["Einzelprojekt", "Multiprojekt"]; // Array zur Auswahl des Modus
-        let strAktuellerModus = "Multiprojekt"; // Der aktuell gewählte Modus
+        let strAktuellerModus = "Einzelprojekt"; // Der aktuell gewählte Modus
         let bolOhneWochenenden = true; // Sollen Wochenenden ignoriert werden?
         let bolOhneFeiertage = true; // Sollen Feiertage ignoriert werden?
         let bolEntscheidungenImmerMitschicken = false; // Historische Entscheidungen immer anhängen?
         let strWiederholung = "wöchentlich"; // Gewähltes Intervall
         let intWiederholungTage = 7; // Anzahl der Tage zwischen Besprechungen
         let strBetreffzeilentext = "Protokoll Jour Fixe"; // Betreff für E-Mails
-        let strOrgaName = "Meine Organisation";
+        let strOrgaName = "Firma GmbH";
         let strOrgaAdresse = "Musterstraße 1, 12345 Musterstadt";
         let strGeplanteStartzeit = "10:00";
         let strGeplanteEndzeit = "11:00";
         let bolDarkMode = true;
-        let strLogoPfad = "Logo.jpeg"; // Standard-Logo
+        let strLogoPfad = "";
         let bolDarkModeStart = false;
         let bolTimerSekundenAusblenden = false;
         let bolTimerBlinkenAus = false;
         let strNamenszusatz = "";        
         let strAblagepfad = "";
-        let bolAutoHtml = false;
-        let bolAutoJson = false;
+        let bolAutoHtml = true;
+        let bolAutoJson = true;
         let bolAutoAsk = false;
 
         // Globale Variablen für den isolierten Modus
         let bolIsolierterModus = false;
-        let intGeparkterPunktNr = null; // NEU: Merkt sich, wo die Besprechung gerade stand!
+        let intGeparkterPunktNr = null; // Merkt sich, wo die Besprechung gerade stand!
 
 
         // ==========================================
@@ -1683,7 +1700,7 @@
         let arrAnwesenheitsHistorie = []; // Speichert Anwesende pro Besprechungsnummer
         let strModeratorName = "";
         let strModeratorEmail = "";
-        let arrOrganisationen = ["Eigene Firma", "Kunde", "Extern"]; // Beispiel-Werte
+        let arrOrganisationen = ["Firma GmbH", "Kunde", "Extern"]; // Beispiel-Werte
         let arrFunktionen = ["Projektleitung", "Entwicklung", "Beratung"]; // Beispiel-Werte
 
         let arrBesprOrte = [
@@ -1691,9 +1708,9 @@
             { strName: "Teams Meeting", bolOnline: true, strLinkOderAdresse: "https://teams.microsoft.com/..." }
         ];
         let arrAgendapunkte = [
-            { strTitel: "Begrüßung", strKategorie: "Allgemein" },
-            { strTitel: "Aktueller Status", strKategorie: "Allgemein" },
-            { strTitel: "Sonstiges", strKategorie: "Allgemein" }
+            { strTitel: "Begrüßung", strKategorie: "Allgemein", strName: "Max Mustermann" },
+            { strTitel: "Aktueller Status", strKategorie: "Allgemein", strName: "Max Mustermann" },
+            { strTitel: "Sonstiges", strKategorie: "Allgemein", strName: "Max Mustermann" }
         ];
         let arrAgendaEinmalig = []; // Speichert die Punkte, die nur für das NÄCHSTE Meeting gelten        
         let arrKategorien = ["Allgemein", "Technik", "Personal", "Kunde"]; // Dropdown-Werte Kategorien
@@ -1703,18 +1720,18 @@
         // ==========================================
         // Array der Projekte
         let arrProjekte = [
-            { strKurzbezeichnung: "PRJ01", strBeschreibung: "Neubau Halle", bolAktiv: true }
+            { strKurzbezeichnung: "Beispielprojekt", strBeschreibung: "Beispiel", bolAktiv: true }
         ];
         let strVorherigeAnsichtProjekte = "view-startmenue"; // Merkt sich, woher wir kamen
 
         // Array aller Teilnehmer (Stammdaten)
         let arrListeTeilnehmer = [
-            { strVorname: "Max", strNachname: "Mustermann", strOrganisation: "Firma GmbH", strFunktion: "Leiter", strEmail: "max@test.de", strAnrede: "Herr", bolAktiv: true, bolProtokollfuehrer: true, strTeilnehmerkurzzeichen: "MM" }
+            { strVorname: "Max", strNachname: "Mustermann", strOrganisation: "Firma GmbH", strFunktion: "Projektleitung", strEmail: "max@test.de", strAnrede: "Herr", bolAktiv: true, bolProtokollfuehrer: true, strTeilnehmerkurzzeichen: "MM" }
         ];
 
         // Array stille Mitleser
         let arrStilleMitleser = [
-            { strVorname: "Anna", strNachname: "Schmidt", strOrganisation: "Firma GmbH", strFunktion: "Controlling", strEmail: "anna@test.de", strAnrede: "Frau" }
+            { strVorname: "Anna", strNachname: "Schmidt", strOrganisation: "Firma GmbH", strFunktion: "Entwicklung", strEmail: "anna@test.de", strAnrede: "Frau" }
         ];
 
         // Der Kern des Programms: Die Protokolldaten
@@ -1892,14 +1909,59 @@
             sichereAktuelleReiheInLokalemArray();
 
             // 2. Variablen-Reset OHNE Bestätigungsdialog
-            // Wir setzen die wichtigsten Variablen direkt auf Startwerte
             strTitel = name;
             intAktBesprNr = 0;
             intAktBesprPunktNr = 101;
             arrProtokollDaten = [];
             arrAnwesenheitsHistorie = [];
             arrNaechsteTermine = [];
-            // ... hier ggf. weitere wichtige Arrays leeren ...
+            strAktuellerModus = "Einzelprojekt";
+            bolOhneWochenenden = true;
+            bolOhneFeiertage = true;
+            bolEntscheidungenImmerMitschicken = false;
+            strWiederholung = "wöchentlich";
+            intWiederholungTage = 7;
+            strBetreffzeilentext = "Protokoll " + name;
+            strOrgaName = "Firma GmbH"
+            strOrgaAdresse = "Musterstraße 1, 12345 Musterstadt";
+            strGeplanteStartzeit = "10:00";
+            strGeplanteEndzeit = "11:00";
+            bolDarkMode = false;
+            bolDarkModeStart = false;                    
+            bolTimerSekundenAusblenden = false;
+            bolTimerBlinkenAus = false;
+            strNamenszusatz = "";        
+            strAblagepfad = "";
+            bolAutoHtml = true;
+            bolAutoJson = true;
+            bolAutoAsk = false;                    
+            arrListeAktiveTeilnehmer = [];
+            arrStilleMitleser = [];
+            arrAnwesende = [];
+            arrAbwesende = [];
+            floatStandardStundensatz = 100.00; 
+            arrListeProtokollanten = ["Max Mustermann"];
+            strNameProtokollant = "Max Mustermann"; 
+            arrNaechsteTermine = []; 
+            arrAnwesenheitsHistorie = []; 
+            strModeratorName = "";
+            strModeratorEmail = "";
+            arrOrganisationen = ["Firma GmbH", "Kunde", "Extern"]; 
+            arrFunktionen = ["Projektleitung", "Entwicklung", "Beratung"];
+            arrBesprOrte = [
+                { strName: "Konferenzraum A", bolOnline: false, strLinkOderAdresse: "1. OG, Hauptgebäude" },
+                { strName: "Teams Meeting", bolOnline: true, strLinkOderAdresse: "https://teams.microsoft.com/..." }
+            ];
+            arrAgendapunkte = [
+                { strTitel: "Begrüßung", strKategorie: "Allgemein", strName: "Max Mustermann" },
+                { strTitel: "Aktueller Status", strKategorie: "Allgemein", strName: "Max Mustermann" },
+                { strTitel: "Sonstiges", strKategorie: "Allgemein", strName: "Max Mustermann" }
+            ];
+            arrAgendaEinmalig = []; // Speichert die Punkte, die nur für das NÄCHSTE Meeting gelten        
+            arrKategorien = ["Allgemein", "Technik", "Personal", "Kunde"]; // Dropdown-Werte Kategorien
+            arrListeTeilnehmer = [
+                { strVorname: "Max", strNachname: "Mustermann", strOrganisation: "Firma GmbH", strFunktion: "Projektleitung", strEmail: "max@test.de", strAnrede: "Herr", bolAktiv: true, bolProtokollfuehrer: true, strTeilnehmerkurzzeichen: "MM" }
+            ];
 
             // 3. Ein frisches Datenpaket für die neue Reihe erstellen
             const neuesPaket = sammleAlleDaten();
@@ -5363,11 +5425,20 @@
         function besprechungStarten() {
             // 1. Ermitteln, bei welcher Hunderter-Nummer wir gerade stehen
             besprechungsnummerErmitteln();
-            document.getElementById('ui-akt-titel').innerText = strTitel;
 
             const heute = new Date();
 
             bolBesprechungLaeuft = true;
+
+            // Tabs ausblenden
+            const tabContainer = document.getElementById('reihen-tabs');
+            if (tabContainer) tabContainer.classList.add('tabs-versteckt');
+            const btnNeu = document.querySelector('button[onclick="neueReiheErstellen()"]');
+            if (btnNeu) btnNeu.style.display = 'none';
+
+            // 2. Home-Button ausblenden
+            const btnHome = document.getElementById('btn-home');
+            if (btnHome) btnHome.classList.add('nav-versteckt');
 
             // Timer zurücksetzen und starten
             datMeetingStart = new Date();
@@ -5904,6 +5975,18 @@
                 // Der alte Standard-Weg, falls man gar nichts automatisiert hat
                 alert("Besprechung beendet!\nAlle Daten wurden erfolgreich gespeichert.");
             }
+
+            // Tabs wieder einblenden
+            const tabContainer = document.getElementById('reihen-tabs');
+            if (tabContainer) tabContainer.classList.remove('tabs-versteckt');
+            
+            // "Neu"-Button wieder anzeigen
+            const btnNeu = document.querySelector('button[onclick="neueReiheErstellen()"]');
+            if (btnNeu) btnNeu.style.display = 'block';
+
+            // Home-Button wieder einblenden (nur wenn wir nicht schon im Startmenü sind)
+            const btnHome = document.getElementById('btn-home');
+            if (btnHome) btnHome.classList.remove('nav-versteckt');
 
             wechsleAnsicht('view-startmenue');
         }
@@ -7168,7 +7251,9 @@
                 intGeparkterPunktNr: intGeparkterPunktNr,
                 // 3. Arrays (Stammdaten & Protokolle)
                 arrListeTeilnehmer: arrListeTeilnehmer,
+                arrListeAktiveTeilnehmer: arrListeAktiveTeilnehmer,
                 arrStilleMitleser: arrStilleMitleser,
+                arrListeProtokollanten: arrListeProtokollanten,
                 arrOrganisationen: arrOrganisationen,
                 arrFunktionen: arrFunktionen,
                 arrProjekte: arrProjekte,
@@ -7224,8 +7309,10 @@
             if (paket.intGeparkterPunktNr !== undefined) intGeparkterPunktNr = paket.intGeparkterPunktNr;
 
             // Arrays wiederherstellen
+            if (paket.arrListeAktiveTeilnehmer) arrListeAktiveTeilnehmer = paket.arrListeAktiveTeilnehmer || paket.arrListeAktiveTeilnehmer; 
             if (paket.arrListeTeilnehmer) arrListeTeilnehmer = paket.arrListeTeilnehmer || paket.arrListeTeilnehmer; 
             if (paket.arrStilleMitleser) arrStilleMitleser = paket.arrStilleMitleser;
+            if (paket.arrListeProtokollanten) arrListeProtokollanten = paket.arrListeProtokollanten;
             if (paket.arrOrganisationen !== undefined) arrOrganisationen = paket.arrOrganisationen;
             if (paket.arrFunktionen !== undefined) arrFunktionen = paket.arrFunktionen;
             if (paket.arrProjekte) arrProjekte = paket.arrProjekte;
