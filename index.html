@@ -1214,17 +1214,23 @@
 
         <div style="background: #eef2f5; border: 1px solid var(--border-color, #ddd); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1em; color: var(--accent-color, #0056b3); border-bottom: 1px solid #eee; padding-bottom: 8px;">Ansicht & Timer</h3>
-            
             <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px;">
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px;  border-radius: 5px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 5px;">
                     <input type="checkbox" id="check-darkmode-start" style="width: 18px; height: 18px; margin: 0;"> 
                     <span>🌙 Beim Start automatisch im Darkmode öffnen</span>
                 </label>
+
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 5px;">
+                    <input type="checkbox" id="check-auto-fullscreen" onchange="bolAutoFullscreen = this.checked; if(typeof speichereStammdaten === 'function') speichereStammdaten();" style="width: 18px; height: 18px; margin: 0;"> 
+                    <span>📺 Fokus-Modus: Bei Besprechungsstart automatisch Vollbild</span>
+                </label>
+
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 5px;">
                     <input type="checkbox" id="check-timer-sekunden" style="width: 18px; height: 18px; margin: 0;"> 
                     <span>⏱ Sekunden in der Timer-Anzeige ausblenden</span>
                 </label>
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px;  border-radius: 5px;">
+                
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 5px;">
                     <input type="checkbox" id="check-timer-blinken" style="width: 18px; height: 18px; margin: 0;"> 
                     <span>🚫 Pausen-Animation (Blinken) abschalten</span>
                 </label>
@@ -1662,6 +1668,7 @@
         let bolAutoHtml = true;
         let bolAutoJson = true;
         let bolAutoAsk = false;
+        let bolAutoFullscreen = false;
 
         // Globale Variablen für den isolierten Modus
         let bolIsolierterModus = false;
@@ -2075,6 +2082,7 @@
             bolAutoAsk = document.getElementById('check-auto-ask').checked;
 
             bolDarkModeStart = document.getElementById('check-darkmode-start').checked;
+            bolAutoFullscreen = document.getElementById('check-auto-fullscreen').checked;
             bolTimerSekundenAusblenden = document.getElementById('check-timer-sekunden').checked;
             bolTimerBlinkenAus = document.getElementById('check-timer-blinken').checked;
             strNamenszusatz = document.getElementById('select-namenszusatz').value;
@@ -5454,7 +5462,9 @@
             if (btnHome) btnHome.classList.add('nav-versteckt');
 
             // Vollbild aktivieren
-            aktiviereVollbild();
+            if (bolAutoFullscreen) {
+                aktiviereVollbild();
+            }
 
             // Timer zurücksetzen und starten
             datMeetingStart = new Date();
@@ -6005,7 +6015,9 @@
             if (btnHome) btnHome.classList.remove('nav-versteckt');
 
             // Vollbild verlassen
-            beendeVollbild();
+            if (bolAutoFullscreen) {
+                beendeVollbild();
+            }
 
             wechsleAnsicht('view-startmenue');
         }
@@ -7291,6 +7303,7 @@
                 strLogoPfad: strLogoPfad,
                 intPausenErinnerungMinuten: intPausenErinnerungMinuten,
                 bolDarkModeStart: bolDarkModeStart,
+                bolAutoFullscreen: bolAutoFullscreen,
                 bolTimerSekundenAusblenden: bolTimerSekundenAusblenden,
                 bolTimerBlinkenAus: bolTimerBlinkenAus,
                 strNamenszusatz: strNamenszusatz,
@@ -7365,6 +7378,7 @@
             if (paket.strTplProtokoll !== undefined) strTplProtokoll = paket.strTplProtokoll;
 
             if (paket.bolDarkModeStart !== undefined) bolDarkModeStart = paket.bolDarkModeStart;
+            if (paket.bolAutoFullscreen !== undefined) bolAutoFullscreen = paket.bolAutoFullscreen;
             if (paket.bolTimerSekundenAusblenden !== undefined) bolTimerSekundenAusblenden = paket.bolTimerSekundenAusblenden;
             if (paket.bolTimerBlinkenAus !== undefined) bolTimerBlinkenAus = paket.bolTimerBlinkenAus;
             if (paket.strNamenszusatz !== undefined) strNamenszusatz = paket.strNamenszusatz;
