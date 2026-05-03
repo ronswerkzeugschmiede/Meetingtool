@@ -556,10 +556,18 @@
                 color: black !important;
             }
 
-            /* 2. Verstecke die gesamte normale Tool-Oberfläche */
-            .ansicht, button, hr, #global-top-right, .no-print {
+            /* 2. Verstecke die gesamte normale Tool-Oberfläche inklusive Tabs und UI-Header */
+            .ansicht, 
+            button, 
+            hr, 
+            #global-top-right, 
+            .no-print, 
+            #tab-leiste-global, 
+            #header-identitaet, 
+            [style*="height: 60px"] { /* Versteckt auch den Platzhalter-Div */
                 display: none !important;
             }
+
 
             /* ========================================== */
             /* 3. WEICHE: WAS SOLL GEDRUCKT WERDEN?       */
@@ -590,7 +598,7 @@
 
 <body>
     <!-- 1. REIHE: Nur für die Tabs (Fixiert ganz oben) -->
-    <div id="tab-leiste-global" style="position: fixed; top: 0; left: 0; width: 100%; display: flex; align-items: center; background: #eef2f5; border-bottom: 2px solid #ddd; z-index: 1001; height: 50px; padding: 0 20px;">
+    <div id="tab-leiste-global" class="no-print" style="position: fixed; top: 0; left: 0; width: 100%; display: flex; align-items: center; background: #eef2f5; border-bottom: 2px solid #ddd; z-index: 1001; height: 50px; padding: 0 20px;">
         <div id="reihen-tabs" style="display: flex; gap: 5px; height: 100%; align-items: flex-end; overflow-x: auto; overflow-y: hidden; white-space: nowrap; max-width: calc(100vw - 400px); scrollbar-width: thin; scrollbar-color: #ccc transparent; -webkit-overflow-scrolling: touch;">
         </div>
         <button onclick="neueReiheErstellen()" style="background: #28a745; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 15px;">+ Neu</button>
@@ -603,12 +611,12 @@
     </div>
 
     <!-- PLATZHALTER -->
-    <div style="height: 60px;"></div>
+    <div class="no-print" style="height: 60px;"></div>
 
     <div id="main-content-container" style="padding: 0 20px;">
         
         <!-- 2. REIHE: Organisation, Titel & Logo -->
-        <div id="header-identitaet" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+        <div id="header-identitaet" class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
             
             <div id="titel-bereich">
                 <div id="ui-orga-name" style="color: gray; font-size: 14px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">MEINE ORGANISATION</div>
@@ -619,8 +627,7 @@
                 <img id="ui-logo-global" alt="Logo" style="max-height: 80px; object-fit: contain;" 
                     onerror="this.style.display='none'; document.getElementById('logo-hinweis-global').style.display='block';">
                 <span id="logo-hinweis-global" style="display:none; color: gray; font-size: 0.8em;">(Kein Logo hinterlegt)</span>
-            </div>
-            
+            </div>            
         </div>
 
     <div id="print-bereich"></div>
@@ -1681,6 +1688,7 @@
         let intAktBesprNr = 0; // Aktuelle Besprechungsnummer (z.B. 100 für die erste)
         let intAktBesprPunktNr = 101; // Laufnummer: [BesprechungsNr] + [Laufende Nr], Start ist 101
         let bolBesprechungLaeuft = false;
+        let strAktBesprechungsort = "";
 
         // ==========================================
         // VARIABLEN FÜR DEN TIMER & PAUSE
@@ -1703,7 +1711,7 @@
         let arrAbwesende = []; // Speichert die Namen der Fehlenden für den Mail-Verteiler
         let floatStandardStundensatz = 100.00; // Neuer fiktiver Stundensatz
         let arrListeProtokollanten = []; // Aktive Teilnehmer für das Dropdown "Protokollführer"
-        let strNameProtokollant = ""; // Ausgewählter Protokollführer
+        let strNameAktuellerProtokollant = ""; // Ausgewählter Protokollführer
         let arrNaechsteTermine = []; // Speichert die nächsten 6 Termine (Format: YYYY-MM-DD)
         let arrAnwesenheitsHistorie = []; // Speichert Anwesende pro Besprechungsnummer
         let strModeratorName = "";
@@ -1969,7 +1977,7 @@
             arrAbwesende = [];
             floatStandardStundensatz = 100.00; 
             arrListeProtokollanten = ["Max Mustermann"];
-            strNameProtokollant = "Max Mustermann"; 
+            strNameAktuellerProtokollant = "Max Mustermann"; 
             arrNaechsteTermine = []; 
             arrAnwesenheitsHistorie = []; 
             strModeratorName = "";
@@ -3837,12 +3845,33 @@
                 let tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid #eee";
                 tr.innerHTML = `
-                    <td style="padding: 4px 10px; font-weight: bold;">${nr}</td>
-                    <td style="padding: 4px 10px;">${anzeigeDatum}</td>
-                    <td style="padding: 4px 10px;"><input type="time" onchange="berechneHistorieDauer(${eintrag.intBesprNr})" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
-                    <td style="padding: 4px 10px;"><input type="time" onchange="berechneHistorieDauer(${eintrag.intBesprNr})" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;"></td>
-                    <td style="padding: 4px 10px;"><input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 60px; border: 1px solid #ddd; font-size: 0.9em;"></td>
-                    <td style="padding: 4px 10px;">
+                    <td style="padding: 10px 10px; font-weight: bold; vertical-align: top;">${nr}</td>
+                    <td style="padding: 10px 10px; vertical-align: top;">
+                        <div>${anzeigeDatum}</div>
+                        <div style="font-size: 0.75em; color: gray; margin-top: 5px;">Ref: ${eintrag.intBesprNr}</div>
+                    </td>
+                    <td colspan="3" style="padding: 10px 10px; vertical-align: top;">
+                        <!-- Obere Zeile: Start, Ende, Dauer -->
+                        <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 8px;">
+                            <input type="time" onchange="berechneHistorieDauer(${eintrag.intBesprNr})" id="hist-start-${eintrag.intBesprNr}" value="${eintrag.datIstStartZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;">
+                            <input type="time" onchange="berechneHistorieDauer(${eintrag.intBesprNr})" id="hist-ende-${eintrag.intBesprNr}" value="${eintrag.datIstEndeZeit || ''}" style="border: 1px solid #ddd; font-size: 0.9em; width: 75px;">
+                            <input type="number" id="hist-dauer-${eintrag.intBesprNr}" value="${eintrag.intGesamtdauerOhnePause || 0}" style="width: 50px; border: 1px solid #ddd; font-size: 0.9em; padding: 2px;">
+                            <span style="font-size: 0.8em; color: gray;">Min.</span>
+                        </div>
+                        
+                        <!-- Untere Zeile: Ort & Protokollant (Kompakt untereinander) -->
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; align-items: center; gap: 5px; font-size: 0.85em;">
+                                <span title="Ort" style="width: 15px;">📍</span>
+                                <input type="text" id="hist-ort-${eintrag.intBesprNr}" placeholder="Ort" value="${eintrag.strOrt || ''}" style="flex-grow: 1; border: none; border-bottom: 1px solid #eee; background: transparent; padding: 2px;">
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px; font-size: 0.85em;">
+                                <span title="Protokollführer" style="width: 15px;">✍️</span>
+                                <input type="text" id="hist-protokollant-${eintrag.intBesprNr}" placeholder="Protokollant" value="${eintrag.strProtokollant || ''}" style="flex-grow: 1; border: none; border-bottom: 1px solid #eee; background: transparent; padding: 2px;">
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 10px 10px; vertical-align: top;">
                         <div style="display: flex; flex-direction: column; gap: 5px;">
                             <div style="display: flex; align-items: flex-start; gap: 5px;">
                                 <span style="color: green; font-weight: bold; width: 15px; margin-top: 3px;">A:</span>
@@ -3861,7 +3890,7 @@
                         </div>
                     </td>
                 `;
-                container.appendChild(tr);
+                container.appendChild(tr);               
             });
 
             // 4. Gesamtdauer formatieren
@@ -5444,12 +5473,28 @@
         }
 
         function besprechungStarten() {
+            //console.group("Meeting-Start Debug");
+            //console.log("Status vor Start - BesprNr:", intAktBesprNr, "Datenmenge:", arrProtokollDaten.length);
             // 1. Ermitteln, bei welcher Hunderter-Nummer wir gerade stehen
             besprechungsnummerErmitteln();
 
             const heute = new Date();
 
             bolBesprechungLaeuft = true;
+
+            // Besprechungsort & Protokollant auslesen und Variable füllen
+            const selOrt = document.getElementById('select-ort');
+            const selProt = document.getElementById('select-protokollfuehrer');
+            strAktBesprechungsort = selOrt ? selOrt.value : "Nicht angegeben";
+            strNameAktuellerProtokollant = selProt ? selProt.value.trim() : "";
+            
+            // Ohne Auswahl wird die erste Position genommen
+            if (strNameAktuellerProtokollant === "" && arrListeProtokollanten.length > 0) {
+                strNameAktuellerProtokollant = (arrListeProtokollanten[0].strVorname + " " + arrListeProtokollanten[0].strNachname).trim();
+            }
+            if (strAktBesprechungsort === "" && arrBesprOrte.length > 0) {
+                strAktBesprechungsort = (arrBesprOrte[0].strName);
+            }
 
             // Tabs ausblenden
             const tabContainer = document.getElementById('reihen-tabs');
@@ -5492,10 +5537,20 @@
                     }
                 }
             });
+            // Archivierung rückmelden 
+            let archiviertZaehler = 0;
+            arrProtokollDaten.forEach(punkt => {
+                if (["Info", "Agenda", "Entscheidung"].includes(punkt.strTyp)) {
+                    punkt.bolAktuellAnzeigen = false;
+                    archiviertZaehler++;
+                }
+            });
+            //console.log(`Archivierung abgeschlossen. ${archiviertZaehler} Punkte ausgeblendet.`);
 
             // 3. Neue Nummern für diese Sitzung festlegen
             intAktBesprNr = intAktBesprNr + 100;        // z.B. 200
             intAktBesprPunktNr = intAktBesprNr + 1;     // z.B. 201
+            //console.log("Neue Nummern generiert - Basis:", intAktBesprNr, "Punkt-Start:", intAktBesprPunktNr);
 
             // =========================================================
             // 4a. EINMALIGE Agendapunkte (Stehen ganz oben)
@@ -5506,7 +5561,7 @@
                 let wer = (typeof agendaObj === 'object' && agendaObj.strName) ? agendaObj.strName : ""; 
                 
                 // ==========================================
-                // NEU: Projekt auslesen
+                // Projekt auslesen
                 // ==========================================
                 let proj = (typeof agendaObj === 'object' && agendaObj.strProjekt) ? agendaObj.strProjekt : ""; 
 
@@ -5526,7 +5581,7 @@
                 intAktBesprPunktNr++; 
             });
             
-            // WICHTIG: Einmalige Punkte nach Übernahme ins Protokoll leeren!
+            // Einmalige Punkte nach Übernahme ins Protokoll leeren!
             arrAgendaEinmalig = [];
 
             // =========================================================
@@ -5538,7 +5593,7 @@
                 let wer = (typeof agendaObj === 'object' && agendaObj.strName) ? agendaObj.strName : ""; 
                 
                 // ==========================================
-                // NEU: Projekt auslesen
+                // Projekt auslesen
                 // ==========================================
                 let proj = (typeof agendaObj === 'object' && agendaObj.strProjekt) ? agendaObj.strProjekt : ""; 
 
@@ -5567,13 +5622,13 @@
             // ==========================================
             // FIX: Protokollführer-Häkchen setzen
             // ==========================================
-            const selProt = document.getElementById('select-protokollfuehrer');
-            let protokollfuehrerReinerName = selProt ? selProt.value.trim() : "";
-
+            let protokollfuehrerReinerName = strNameAktuellerProtokollant
+            
             // Fallback falls Dropdown leer
             if (protokollfuehrerReinerName === "" && arrListeProtokollanten.length > 0) {
                 protokollfuehrerReinerName = (arrListeProtokollanten[0].strVorname + " " + arrListeProtokollanten[0].strNachname).trim();
             }
+
 
             const checkboxes = document.querySelectorAll('#liste-teilnehmer-checkboxen input[type="checkbox"]');
             checkboxes.forEach(cb => {
@@ -5583,6 +5638,11 @@
 
             // 6. Optisch zur Anwesenheitsliste wechseln
             wechsleAnsicht('view-anwesenheit');
+            //console.log ("Protokollführer: " + protokollfuehrerReinerName)
+            //console.log (strAktBesprechungsort)
+
+            //console.log("Meeting erfolgreich gestartet. Ansicht gewechselt zu Anwesenheit.");
+            //console.groupEnd();
         }
 
         // ==========================================
@@ -5948,7 +6008,9 @@
                 datIstEndeZeit: datIstEnde.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}),
                 intGesamtdauerOhnePause: dauerMinuten,
                 arrAnwesende: [...arrAnwesende],                     // Passend zu eintrag.arrAnwesende
-                arrAbwesende: [...arrAbwesende]                      // Passend zu eintrag.arrAbwesende
+                arrAbwesende: [...arrAbwesende],                      // Passend zu eintrag.arrAbwesende
+                strOrt: strAktBesprechungsort,
+                strProtokollant: strNameAktuellerProtokollant
             };
 
             // 3. In das globale Array schieben (Check auf Doppeleintrag)
@@ -6056,7 +6118,7 @@
             
             // 1. Grunddaten sammeln
             const gruss = tageszeitabhaengigerGruss();
-            const gewaehlterOrtName = document.getElementById('select-ort').value || "Unbekannt";
+            const gewaehlterOrtName = strAktBesprechungsort
             let ortObj = arrBesprOrte.find(o => o.strName === gewaehlterOrtName);
             let ort = gewaehlterOrtName;
 
@@ -6218,7 +6280,7 @@
 
             // 2. Grunddaten sammeln
             const gruss = tageszeitabhaengigerGruss();
-            const gewaehlterOrtName = document.getElementById('select-ort').value || "Unbekannt";
+            const gewaehlterOrtName = strAktBesprechungsort
             let ortObj = arrBesprOrte.find(o => o.strName === gewaehlterOrtName);
             let ort = gewaehlterOrtName;
 
@@ -6271,7 +6333,7 @@
             let aktuellePunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true);
 
             // ==========================================
-            // NEU: Die gleiche Sortier-Logik wie beim PDF
+            // Die gleiche Sortier-Logik wie beim PDF
             // ==========================================
             aktuellePunkte.sort((a, b) => {
                 const getGewicht = (typ) => {
@@ -6400,7 +6462,7 @@
             let arrVerteiler = arrAbwesende.concat(arrNamenMitleser);
             let strVerteiler = arrVerteiler.length > 0 ? arrVerteiler.join(', ') : '-';
 
-            const ort = document.getElementById('select-ort').value || "Unbekannt";
+            const ort = strAktBesprechungsort
             const inputDatum = document.getElementById('input-datum').value;
             const besprDatum = inputDatum ? inputDatum.split('-').reverse().join('.') : "Heute";
             const besprZeit = document.getElementById('input-uhrzeit').value || "00:00";
@@ -6429,11 +6491,26 @@
 
             // Stammdaten-Tabelle
             pdfHTML += `<table width="100%" cellpadding="4" style="background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 20px;">
-                <tr><td width="15%"><b>Datum:</b></td><td width="35%">${besprDatum}, ${besprZeit} - ${besprEndZeit} Uhr</td>
-                    <td width="15%"><b>Ort:</b></td><td width="35%">${ort}</td></tr>
-                <tr><td valign="top"><b>Anwesend:</b></td><td colspan="3">${strAnwesende}</td></tr>
-                <tr><td valign="top"><b>Verteiler:</b></td><td colspan="3">${strVerteiler}</td></tr>
+                <tr>
+                    <td width="15%"><b>Datum:</b></td>
+                    <td width="35%">${besprDatum}, ${besprZeit} - ${besprEndZeit} Uhr</td>
+                    <td width="15%"><b>Ort:</b></td>
+                    <td width="35%">${ort}</td>
+                </tr>
+                <tr>
+                    <td><b>Protokoll:</b></td>
+                    <td colspan="3">${strNameAktuellerProtokollant}</td>
+                </tr>
+                <tr>
+                    <td valign="top"><b>Anwesend:</b></td>
+                    <td colspan="3">${strAnwesende}</td>
+                </tr>
+                <tr>
+                    <td valign="top"><b>Verteiler:</b></td>
+                    <td colspan="3">${strVerteiler}</td>
+                </tr>
             </table>`;
+
 
             // Liste der aktuellen Punkte filtern
             let aktuellePunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true);
@@ -7296,6 +7373,8 @@
                 strTplEinladung: strTplEinladung,
                 strTplErinnerung: strTplErinnerung,
                 strTplProtokoll: strTplProtokoll,
+                strAktBesprechungsort: strAktBesprechungsort,
+                strNameAktuellerProtokollant: strNameAktuellerProtokollant,
                 arrAnwesenheitsHistorie: arrAnwesenheitsHistorie,
                 strModeratorName: strModeratorName,
                 strModeratorEmail: strModeratorEmail,
@@ -7338,6 +7417,8 @@
             if (paket.intAktBesprNr !== undefined) intAktBesprNr = paket.intAktBesprNr;
             if (paket.intAktBesprPunktNr !== undefined) intAktBesprPunktNr = paket.intAktBesprPunktNr;
             if (paket.intGeparkterPunktNr !== undefined) intGeparkterPunktNr = paket.intGeparkterPunktNr;
+            if (paket.strAktBesprechungsort !== undefined) strAktBesprechungsort = paket.strAktBesprechungsort;
+            if (paket.strNameAktuellerProtokollant !== undefined) strNameAktuellerProtokollant = paket.strNameAktuellerProtokollant;
 
             // Arrays wiederherstellen
             if (paket.arrListeAktiveTeilnehmer) arrListeAktiveTeilnehmer = paket.arrListeAktiveTeilnehmer || paket.arrListeAktiveTeilnehmer; 
