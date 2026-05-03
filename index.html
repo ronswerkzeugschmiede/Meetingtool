@@ -1141,7 +1141,7 @@
                     <button onclick="document.getElementById('input-logo-file').click()" style="margin: 0; background: #0056b3; color: white; border: none; white-space: nowrap; padding: 8px 15px;">📁 Bild auswählen</button>
                     <input type="file" id="input-logo-file" accept="image/*" style="display: none;" onchange="ladeLogoDatei(event)">
                 </div>
-                <p style="font-size: 0.8em; color: gray; margin-top: 5px;">Hinterlege eine Web-URL oder lade ein lokales Bild hoch.</p>
+                <p style="font-size: 0.8em; color: gray; margin-top: 5px;">Lade ein lokales Bild oder hinterlege eine Web-URL. Achtung! Web-Url's funktionieren nicht immer.</p>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -5560,7 +5560,7 @@
                     }
                 }
             });
-            // Archivierung rückmelden 
+            // Archivierung rückmelden (nur für debuging)
             let archiviertZaehler = 0;
             arrProtokollDaten.forEach(punkt => {
                 if (["Info", "Agenda", "Entscheidung"].includes(punkt.strTyp)) {
@@ -5642,8 +5642,25 @@
             // 5. Alles direkt in die IndexedDB speichern!
             speichereDatenInDB();
 
+            // Fokus auf den ältesten aktiven Punkt setzen 
+            const aktivePunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true);
+
+            if (aktivePunkte.length > 0) {
+                // Wir sortieren sie aufsteigend nach ihrer Nummer (kleinste zuerst = älteste)
+                aktivePunkte.sort((a, b) => a.intBesprechungspunktnummer - b.intBesprechungspunktnummer);
+                
+                // Wir setzen die aktive Punktnummer auf den ältesten gefundenen Punkt
+                intAktBesprPunktNr = aktivePunkte[0].intBesprechungspunktnummer;
+                
+                // Optional: Console Log zum Prüfen
+                // console.log("Startet bei ältestem Punkt Nr.: " + intAktBesprPunktNr);
+            } else {
+                // Fallback: Falls gar nichts da ist (unwahrscheinlich), nimm den Standard
+                intAktBesprPunktNr = intAktBesprNr + 1;
+            }
+
             // ==========================================
-            // FIX: Protokollführer-Häkchen setzen
+            // Protokollführer-Häkchen setzen
             // ==========================================
             let protokollfuehrerReinerName = strNameAktuellerProtokollant
             
