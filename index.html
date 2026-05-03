@@ -1443,21 +1443,22 @@
                 <textarea id="input-beschreibung" rows="8" style="width: 100%; font-size: 18px;" spellcheck="true" lang="de-DE" oninput="ueberwacheTexteingabe(event)"></textarea>
                 <div style="font-size: 0.85em; color: #555; margin-top: 0; padding: 2px 0 0 0; background-color: transparent; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                     <span style="opacity: 0.8;"><b>Schnelleingabe zum Einfügen</b></span>
+                    <span> (+ Leertaste) </span>
+                    <span style="color: #ccc;">|</span>
                     
                     <span style="color: #0056b3;"><b>##</b> Kat/Projekt</span>
                     <span style="color: #ccc;">|</span>
-                    <span style="color: #0056b3;"><b>###</b> Verlinkung</span>
+                    <span style="color: #0056b3;"><b>###</b> BesprPunkt Verweis</span>
                     <span style="color: #ccc;">|</span>
                     
                     <span style="color: #28a745;"><b>++</b> Orga/Funktion</span>
                     <span style="color: #ccc;">|</span>
                     <span style="color: #28a745;"><b>+++</b> Person</span>
                     <span style="color: #ccc;">|</span>
-                    <span style="color: #fd7e14;"><b>++++</b> Gruppe</span>
+                    <span style="color: #fd7e14;"><b>++++</b> Alle Namen einer Gruppe</span>
                     <span style="color: #ccc;">|</span>
                     
                     <span style="color: #666;"><b>@@</b> Datum</span>
-                    <span> (+ Leertaste)</span>
                     
                     <span style="color: #ccc;">|</span>
                     <span style="color: #0056b3;"><b>#</b> Hashtags werden unterstützt</span>
@@ -1843,6 +1844,26 @@
             }
         }
 
+        function aktiviereVollbild() {
+            const element = document.documentElement; // Die gesamte Seite
+
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) { /* Safari */
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) { /* IE11 */
+                element.msRequestFullscreen();
+            }
+        }
+
+        function beendeVollbild() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+
         function aktualisiereTabLeiste() {
             const container = document.getElementById('reihen-tabs');
             container.innerHTML = "";
@@ -2101,7 +2122,7 @@
         function toggleDarkMode() {
             bolDarkMode = !bolDarkMode;
             wendeDarkModeAn();
-            speichereDatenInDB(); // Wir speichern die Wahl direkt ab
+            speichereDatenInDB(); 
         }
 
         function wendeDarkModeAn() {
@@ -2204,11 +2225,11 @@
             }
 
             // ==========================================
-            // NEU: Liste nach dem Suchbegriff filtern
+            // Liste nach dem Suchbegriff filtern
             // ==========================================
             if (suchBegriff !== "") {
                 anzeigePunkte = anzeigePunkte.filter(p => {
-                    // Wir werfen alle Infos in einen großen Text-Topf, um alles gleichzeitig durchsuchen zu können
+                    // Alle Infos zusammen, um alles gleichzeitig durchsuchen zu können
                     let volltext = `${p.strBeschreibung} ${p.strName} ${p.strKategorie} ${p.strProjekt} ${p.strTyp} #${p.intBesprechungspunktnummer}`.toLowerCase();
                     return volltext.includes(suchBegriff);
                 });
@@ -2445,7 +2466,6 @@
                 // ... ändere ihn sofort auf "Info"
                 selectTyp.value = "Info";
                 
-                // Wir rufen direkt deine bestehende Funktion auf, damit sich auch
                 // die Zieldatum-Felder ggf. anpassen, falls nötig!
                 if (typeof prüfeTypAuswahl === "function") {
                     prüfeTypAuswahl();
@@ -2674,8 +2694,8 @@
             objAktuellesTextfeld = document.activeElement; 
             intCursorPosition = objAktuellesTextfeld.selectionStart;
 
-            let titel = typ === "Aufgabe" ? "Offene Aufgaben" : typ + "s";
-            document.getElementById('label-referenz-titel').innerText = "🔍 " + titel + " verlinken:";
+            let titel = typ === "Aufgabe" ? "Offene Aufgaben" : typ + "";
+            document.getElementById('label-referenz-titel').innerText = "🔍 " + titel + " einfügen:";
             document.getElementById('box-referenz-picker').style.display = 'block';
             document.getElementById('input-referenz-suche').value = "";
             document.getElementById('input-referenz-suche').focus();
@@ -2827,7 +2847,6 @@
                 let neuePos = textVorher.length + dateStr.length + 1;
                 ta.setSelectionRange(neuePos, neuePos);
                 
-                // Wir speichern im Hintergrund, da sich der Text geändert hat
                 speicherePunktAusUI();
             }
             
@@ -3074,7 +3093,7 @@
             intAktuellerFokusIndex = 0;   
 
             // ==========================================
-            // NEU: Überschrift anpassen (Gruppe vs. Einzeln)
+            // Überschrift anpassen (Gruppe vs. Einzeln)
             // ==========================================
             let titleEl = document.querySelector('#box-plus-picker h3');
             if (titleEl) {
@@ -3226,7 +3245,7 @@
                 if (typeof aktualisiereSidebar === "function") {
                     aktualisiereSidebar(); 
                 }
-                return; // Stopp! Wir bleiben in der Besprechung.
+                return; // Stopp! Zurück zur Besprechung.
             }
 
             // ==========================================
@@ -3245,7 +3264,7 @@
                     }
                     // Liste sofort neu filtern
                     aktualisiereKombinierteListe();
-                    return; // Stopp! Wir bleiben in der Liste.
+                    return; // Stopp! Zurück zur Liste.
                 }
             }
 
@@ -3461,7 +3480,7 @@
             }
 
             let datumHeute = new Date().toLocaleDateString('de-DE');
-            // Wir kopieren das fertige HTML aus unserem versteckten Div
+            // HTML kopieren
             let tableHTML = document.getElementById('export-container').innerHTML;
 
             // Das kleine Filter-Script für die Offline-Datei (Sicher als String verpackt)
@@ -3984,14 +4003,13 @@
             return maxNr + 1;
         }
 
-        // --- DER MAGISCHE SYNC ---
         // Diese Funktion prüft: Haben wir gerade aktive Anwesenheits-Daten? Dann sichern wir sie!
         // Haben wir keine? Dann holen wir sie uns aus der Historie zurück!
         function ladeOderSichereAnwesenheit() {
             let eintrag = arrAnwesenheitsHistorie.find(h => h.intBesprNr === intAktBesprNr);
 
             if (arrAnwesende.length > 0) {
-                // FALL 1: Wir sind gerade in der Besprechung und haben Daten -> Ab in die Historie damit!
+                // FALL 1: In der Besprechung und Daten liegen vor -> Historie!
                 let datum = document.getElementById('input-datum').value;
                 let datumFormatiert = datum ? datum.split('-').reverse().join('.') : new Date().toLocaleDateString('de-DE');
 
@@ -4157,7 +4175,7 @@
                 if (!inputZieldatum.value) {
                     let zielDatum = new Date();
                     
-                    // Wir addieren die 3-fache Anzahl der Rhythmus-Tage zum heutigen Datum
+                    // Addieren der 3-fache Anzahl der Rhythmus-Tage zum heutigen Datum
                     zielDatum.setDate(zielDatum.getDate() + (3 * intWiederholungTage));
                     
                     // Das Datum für das HTML-Feld formatieren (YYYY-MM-DD)
@@ -4336,7 +4354,7 @@
             arrNaechsteTermine[index] = neuerWert;
             
             // 2. Alle FOLGENDEN Termine ab diesem Index neu berechnen
-            // Wir nutzen ein lokales Datumsobjekt für die Schleife
+            // Lokales Datumsobjekt für die Schleife
             let aktuellesDatum = new Date(neuerWert);
             
             for (let i = index + 1; i < arrNaechsteTermine.length; i++) {
@@ -4475,7 +4493,7 @@
             let aktuellerGruss = tageszeitabhaengigerGruss();
             let feedbackBlock = "";
 
-            // NEU: Wir prüfen direkt hier, ob bolIstHTML "true" ist. 
+            // Prüfen, ob bolIstHTML "true" ist. 
             // Ist es reiner Text (false), bleibt feedbackBlock leer und der Platzhalter verschwindet spurlos.
             if (text.includes("{Feedback}") && bolIstHTML) {
                 if (strModeratorEmail && strModeratorEmail.trim() !== "") {
@@ -4966,8 +4984,7 @@
             let selectName = document.getElementById('select-neue-agenda-name');
             let selectProjekt = document.getElementById('select-neue-agenda-projekt');
             
-            // Wir prüfen, ob der Multiprojekt-Modus aktiv ist
-            // (Passe "Multiprojekt" an, falls dein Modus-String in strAktuellerModus leicht anders heißt)
+            // Prüfen, ob der Multiprojekt-Modus aktiv ist
             let istMultiprojekt = (strAktuellerModus === "Multiprojekt");
 
             if(input && input.value.trim() !== "") {
@@ -5106,7 +5123,6 @@
             
             arrBesprOrte.forEach((ort, index) => {
                 let li = document.createElement('li');
-                // Wir machen aus dem Listeneintrag eine "Flexbox", damit Text links und Buttons rechts stehen
                 li.style.display = "flex";
                 li.style.alignItems = "center";
                 li.style.justifyContent = "space-between";
@@ -5236,7 +5252,6 @@
             
             // Wenn der Punkt nicht existiert (wir haben ganz nach vorne navigiert), legen wir einen neuen an
             if (!objPunkt) {
-                // NEU: Wir holen uns dynamisch die ersten Einträge aus den fertigen Dropdowns
                 let ddKat = document.getElementById('select-kategorie');
                 let startKat = (ddKat && ddKat.options.length > 0) ? ddKat.options[0].value : "Allgemein";
 
@@ -5335,9 +5350,7 @@
             speicherePunktAusUI();
 
             // 2. Startnummer der aktuellen Sitzung ermitteln 
-            // Wichtig: Wir nehmen intAktBesprNr (z.B. 200) + 1 = 201.
-            // Deine alte Rechnung (intAktBesprPunktNr / 100) funktioniert hier nicht mehr, 
-            // da die aufgerufene Punktnummer ja auch aus der Vergangenheit (z.B. 105) stammen könnte!
+            // Wichtig: intAktBesprNr (z.B. 200) + 1 = 201.
             let intSitzungsStartNr = intAktBesprNr + 1; 
 
             // 3. Einen "Navigations-Pfad" aus allen erlaubten Punkten bauen
@@ -5381,17 +5394,17 @@
             // 5. NAVIGATION: WEITER (+1)
             else { 
                 if (currentIndex < arrGueltigeNummern.length - 1) {
-                    // Wir sind mitten auf dem Pfad -> Gehe zum nächsten Punkt der Liste
+                    // Gehe zum nächsten Punkt der Liste
                     intNeueNummer = arrGueltigeNummern[currentIndex + 1];
                 } else {
-                    // Wir sind am ENDE des bekannten Pfades angekommen!
+                    // ENDE des bekannten Pfades!
                     // Jetzt blockieren wir die Erzeugung alter Punkte:
                     if (intAktBesprPunktNr >= intSitzungsStartNr) {
-                        // Wir sind in der aktuellen Sitzung: Neuer Punkt darf ganz normal erzeugt werden (+1)
+                        // Aktuelle Sitzung: Neuer Punkt darf ganz normal erzeugt werden (+1)
                         intNeueNummer = intAktBesprPunktNr + 1;
                     } else {
-                        // Wir haben uns alte Punkte angesehen und sind dort am letzten offenen Punkt angelangt.
-                        // Wir springen zurück in die Gegenwart (erster Punkt der aktuellen Sitzung),
+                        // Alte Punkte angesehen und sind dort am letzten offenen Punkt angelangt.
+                        // Zurück (erster Punkt der aktuellen Sitzung),
                         // OHNE eine alte Nummer künstlich weiterzuzählen!
                         intNeueNummer = intSitzungsStartNr;
                     }
@@ -5410,14 +5423,14 @@
         function besprechungsnummerErmitteln() {
             
             let maxNr = 0;
-            // Wir suchen die allerhöchste vergebene Besprechungspunktnummer
+            // Suche die allerhöchste vergebene Besprechungspunktnummer
             arrProtokollDaten.forEach(punkt => {
                 if (punkt.intBesprechungspunktnummer > maxNr) {
                     maxNr = punkt.intBesprechungspunktnummer;
                 }
             });
             
-            // Mathematik-Trick: Wir schneiden die letzten beiden Ziffern ab. 
+            // Die letzten beiden Ziffern abschneiden 
             // Aus 105 wird 1, mal 100 = 100. Aus 312 wird 300.
             intAktBesprNr = Math.floor(maxNr / 100) * 100;
         }
@@ -5439,6 +5452,9 @@
             // 2. Home-Button ausblenden
             const btnHome = document.getElementById('btn-home');
             if (btnHome) btnHome.classList.add('nav-versteckt');
+
+            // Vollbild aktivieren
+            aktiviereVollbild();
 
             // Timer zurücksetzen und starten
             datMeetingStart = new Date();
@@ -5532,7 +5548,7 @@
                 intAktBesprPunktNr++; 
             });
 
-            // Wir setzen die aktive Nummer wieder auf den ersten neuen Punkt
+            // Aktive Nummer wieder auf den ersten neuen Punkt
             intAktBesprPunktNr = intAktBesprNr + 1;
 
             // 5. Alles direkt in die IndexedDB speichern!
@@ -5551,7 +5567,7 @@
 
             const checkboxes = document.querySelectorAll('#liste-teilnehmer-checkboxen input[type="checkbox"]');
             checkboxes.forEach(cb => {
-                // Wir vergleichen den reinen Namen (value) mit dem reinen Namen aus dem Dropdown
+                // Vergleiche den reinen Namen (value) mit dem reinen Namen aus dem Dropdown
                 cb.checked = (cb.value.trim() === protokollfuehrerReinerName);
             });
 
@@ -5706,7 +5722,7 @@
             
             // Die exakt vergangene Zeit zur Pausendauer addieren (damit das Netto-Meeting weitergeht)
             intPausenDauerMs += (new Date() - datPauseStart);
-            // Balken-Reset: Wir merken uns, dass genau JETZT eine frische Pause endete
+            // Balken-Reset: speichern, dass eine frische Pause endete
             msMeetingDauerBeiLetzterPause = new Date() - datMeetingStart - intPausenDauerMs;
             
             // UI wieder zurücksetzen
@@ -5811,7 +5827,7 @@
             const container = document.getElementById('liste-nachzuegler-checkboxen');
             container.innerHTML = ""; 
 
-            // Wir gehen NUR die Liste der Abwesenden durch
+            // NUR die Liste der Abwesenden durchgehen
             arrAbwesende.forEach((name, index) => {
                 const label = document.createElement('label');
                 label.style.display = "block"; 
@@ -5943,7 +5959,7 @@
             speichereDatenInDB(); // Alles in die DB schreiben
             
             // ==========================================
-            // NEU: AUTO-EXPORT LOGIK (Phase 6)
+            // AUTO-EXPORT LOGIK (Phase 6)
             // ==========================================
             let bolWurdeExportiert = false;
 
@@ -5988,9 +6004,11 @@
             const btnHome = document.getElementById('btn-home');
             if (btnHome) btnHome.classList.remove('nav-versteckt');
 
+            // Vollbild verlassen
+            beendeVollbild();
+
             wechsleAnsicht('view-startmenue');
         }
-
         
         
         // ==========================================
@@ -6491,7 +6509,7 @@
             // Entscheidungen (unten nochmal als kompakte Liste, falls aktiviert)
             if (bolEntscheidungenImmerMitschicken) {
                 const entscheidungen = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true && p.strTyp === "Entscheidung");
-                // Wir sortieren diese Mini-Liste sicherheitshalber auch von Neu nach Alt
+                // sortieren Mini-Liste von Neu nach Alt
                 entscheidungen.sort((a, b) => b.intBesprechungspunktnummer - a.intBesprechungspunktnummer);
                 
                 if(entscheidungen.length > 0) {
@@ -7208,7 +7226,7 @@
             // Wird nur aufgerufen, wenn die DB neu ist oder intDbVersion erhöht wird
             request.onupgradeneeded = function(event) {
                 db = event.target.result;
-                // Wir erstellen einen "Speichertopf" (Object Store) namens "protokolle"
+                //  Object Store namens "protokolle" erstellen
                 // "keyPath" ist der eindeutige Schlüssel, unter dem wir Daten speichern
                 if (!db.objectStoreNames.contains("protokolle")) {
                     db.createObjectStore("protokolle", { keyPath: "id" });
@@ -7409,7 +7427,7 @@
                 const ergebnis = event.target.result;
 
                 if (ergebnis && ergebnis.arrAlleReihen) {
-                    // Wir haben Daten gefunden!
+                    // Daten gefunden!
                     arrAlleReihen = ergebnis.arrAlleReihen;
                     intAktiverReihenIndex = ergebnis.intAktiverReihenIndex || 0;
 
@@ -7433,7 +7451,7 @@
         function werkseinstellungenLaden() {
             if(confirm("ACHTUNG: Möchtest du wirklich alle Daten komplett löschen?\nDas Tool fängt dann wieder absolut bei 0 an!")) {
                 
-                // Wir öffnen die Datenbank und geben den Löschbefehl
+                // Öffnen der Datenbank und Löschbefehl
                 const transaction = db.transaction(["protokolle"], "readwrite");
                 const objectStore = transaction.objectStore("protokolle");
                 const request = objectStore.clear(); // Löscht den gesamten Inhalt!
@@ -7650,7 +7668,7 @@
                 pfad = decodeURI(pfad); // Sonderzeichen wie Leerzeichen reparieren
                 pfad = pfad.replace("file:///", ""); // Das Protokoll vorne abschneiden
                 
-                // Wir schneiden den Dateinamen am Ende ab, um nur den Ordner zu haben
+                //  Kürzen des Dateinamen am Ende, um nur den Ordner zu haben
                 pfad = pfad.substring(0, pfad.lastIndexOf("/") + 1); 
                 
                 // Windows-Pfadstriche hübsch machen
