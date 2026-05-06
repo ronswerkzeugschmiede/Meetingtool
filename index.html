@@ -4570,8 +4570,8 @@
                     let linkModeration = `mailto:${strModeratorEmail}?subject=${subject}&body=${encodeURIComponent(bodyBase + textModeration)}`;
 
                     // Da wir eh im HTML-Modus sind, bauen wir direkt die schönen Buttons
-                    feedbackBlock = `<div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #0056b3; border-radius: 4px;">
-                        <p style="margin-top: 0; font-weight: bold; font-size: 0.9em; color: #555;">Wie war die Besprechung? (1-Klick Feedback)</p>
+                    feedbackBlock = `<div style="margin-top: 20px; padding: 15px; border-left: 4px solid #0056b3; border-radius: 4px;">
+                        <p style="margin-top: 0; font-weight: font-size: 0.9em; ">Wie war die Besprechung? (1-Klick Feedback)</p>
                         <p style="margin-bottom: 0;">
                             <a href="${linkTiming}" style="display: inline-block; padding: 6px 12px; margin-right: 5px; margin-bottom: 5px; background: #e2e8f0; color: #333; text-decoration: none; border-radius: 4px; font-size: 0.9em;">⏱️ Timing</a>
                             <a href="${linkTeilnehmer}" style="display: inline-block; padding: 6px 12px; margin-right: 5px; margin-bottom: 5px; background: #e2e8f0; color: #333; text-decoration: none; border-radius: 4px; font-size: 0.9em;">👥 Teilnehmerkreis</a>
@@ -4605,12 +4605,11 @@
                     return strAblagepfad;
                 });               
         }
-               
+
         function aktualisiereErinnerungenUI() {
             const container = document.getElementById('liste-erinnerungen-ui');
             container.innerHTML = "";
 
-            // 1. Alle aktuell sichtbaren Aufgaben herausfiltern, die KEIN Erledigungsdatum haben und jemandem zugewiesen sind
             let offeneAufgaben = arrProtokollDaten.filter(p => 
                 p.bolAktuellAnzeigen === true && 
                 p.strTyp === "Aufgabe" && 
@@ -4618,65 +4617,61 @@
                 p.strName && p.strName.trim() !== ""
             );
 
-            // 2. Aufgaben nach Personen gruppieren
             let aufgabenNachPerson = {};
             offeneAufgaben.forEach(punkt => {
-                if (!aufgabenNachPerson[punkt.strName]) {
-                    aufgabenNachPerson[punkt.strName] = [];
-                }
+                if (!aufgabenNachPerson[punkt.strName]) aufgabenNachPerson[punkt.strName] = [];
                 aufgabenNachPerson[punkt.strName].push(punkt);
             });
 
-            // 3. Wenn es keine offenen Aufgaben gibt
             if (Object.keys(aufgabenNachPerson).length === 0) {
-                container.innerHTML = `<div style="padding: 15px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px;">
-                    🎉 Großartig! Es gibt aktuell keine offenen Aufgaben, die jemandem zugewiesen sind.
-                </div>`;
+                container.innerHTML = `<div style="...">🎉 Keine offenen Aufgaben.</div>`;
                 return;
             }
 
-            // 4. Für jede Person eine Zeile mit Buttons bauen
             for (let person in aufgabenNachPerson) {
                 let aufgabenListe = aufgabenNachPerson[person];
                 
                 let zeilenDiv = document.createElement('div');
-                zeilenDiv.style.display = "flex";
-                zeilenDiv.style.alignItems = "center";
-                zeilenDiv.style.marginBottom = "10px";
-                zeilenDiv.style.padding = "10px 15px";
-                zeilenDiv.style.background = "#eef2f5";
-                zeilenDiv.style.border = "1px solid #ccc";
-                zeilenDiv.style.borderRadius = "4px";
+                zeilenDiv.style = "display: flex; align-items: center; margin-bottom: 10px; padding: 10px 15px; background: #eef2f5; border: 1px solid #ccc; border-radius: 4px;";
 
                 let textDiv = document.createElement('div');
                 textDiv.style.flexGrow = "1";
-                textDiv.innerHTML = `<strong style="font-size: 1.1em; color: #0056b3;">${person}</strong><br>
-                                     <span style="color: #555; font-size: 0.9em;">Hat ${aufgabenListe.length} offene Aufgabe(n)</span>`;
+                textDiv.innerHTML = `<strong style="color: #0056b3;">${person}</strong><br><span style="font-size: 0.9em;">${aufgabenListe.length} Aufgabe(n)</span>`;
 
-                // E-Mail Button
+                // Button Container für sauberes Layout
+                let btnContainer = document.createElement('div');
+                btnContainer.style.display = "flex";
+                btnContainer.style.gap = "8px";
+
+                // ✉️ E-Mail
                 let btnEmail = document.createElement('button');
-                btnEmail.innerText = "✉️ E-Mail";
-                btnEmail.style.margin = "0";
-                btnEmail.style.padding = "5px 10px";
+                btnEmail.innerText = "✉️ Mail";
                 btnEmail.onclick = () => generiereErinnerungsEmail(person, aufgabenListe);
 
-                // NEU: Kopieren Button für Messenger
+                // 📋 Kopieren
                 let btnKopieren = document.createElement('button');
-                btnKopieren.innerText = "📋 Text kopieren";
-                btnKopieren.style.margin = "0 0 0 10px"; // Ein bisschen Abstand nach links
-                btnKopieren.style.padding = "5px 10px";
-                btnKopieren.style.background = "#17a2b8"; // Ein schickes Blau/Türkis zur Unterscheidung
+                btnKopieren.innerText = "📋 Kopieren";
+                btnKopieren.style.background = "#17a2b8";
                 btnKopieren.style.color = "white";
-                btnKopieren.style.border = "none";
                 btnKopieren.onclick = () => kopiereErinnerungsText(person, aufgabenListe);
 
+                // 📅 Kalender (NEU)
+                let btnCal = document.createElement('button');
+                btnCal.innerText = "📅 Kalender (.ics)";
+                btnCal.style.background = "#6f42c1"; // Lila für Kalender
+                btnCal.style.color = "white";
+                btnCal.onclick = () => generiereKalenderDatei(person, aufgabenListe);
+
+                btnContainer.appendChild(btnEmail);
+                btnContainer.appendChild(btnKopieren);
+                btnContainer.appendChild(btnCal);
+                
                 zeilenDiv.appendChild(textDiv);
-                zeilenDiv.appendChild(btnEmail);
-                zeilenDiv.appendChild(btnKopieren); // Neuen Button hinzufügen
+                zeilenDiv.appendChild(btnContainer);
                 container.appendChild(zeilenDiv);
             }
         }
-
+               
         function bereiteErinnerungsTextVor(name, aufgabenListe) {
             let teilnehmer = arrListeTeilnehmer.find(t => (t.strVorname + " " + t.strNachname) === name);
             let anredeName = teilnehmer && teilnehmer.strAnrede === "Du" ? teilnehmer.strVorname : name;
@@ -4718,6 +4713,66 @@
             });
         }
 
+        function generiereKalenderDatei(name, aufgabenListe) {
+            const jetzt = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+            let icsContent = [
+                "BEGIN:VCALENDAR",
+                "VERSION:2.0",
+                "PRODID:-//Gemini Meetingtool//DE",
+                "CALSCALE:GREGORIAN",
+                "METHOD:PUBLISH"
+            ];
+
+            aufgabenListe.forEach(aufg => {
+                const uuid = "aufgabe-" + aufg.intBesprechungspunktnummer + "-" + Math.random().toString(36).substr(2, 9) + "@meetingtool.local";
+                
+                // Zieldatum für DUE (Fälligkeit) und DTSTART (Start)
+                let dueDateRaw = aufg.datZieldatum ? aufg.datZieldatum.replace(/-/g, "") : "";
+                
+                icsContent.push("BEGIN:VTODO");
+                icsContent.push("UID:" + uuid);
+                icsContent.push("DTSTAMP:" + jetzt);
+                icsContent.push("DTSTART;VALUE=DATE:" + (dueDateRaw || jetzt.split("T")[0])); // Startet heute oder am Zieldatum
+                
+                if (dueDateRaw) {
+                    icsContent.push("DUE;VALUE=DATE:" + dueDateRaw);
+                }
+
+                // Projekt in den Titel aufnehmen, damit es sofort sichtbar ist
+                const projektTag = aufg.strProjekt ? `[${aufg.strProjekt}] ` : "";
+                icsContent.push("SUMMARY:" + projektTag + aufg.strBeschreibung);
+                
+                // Beschreibung mit Umbrüchen (\n) säubern
+                let desc = `Projekt: ${aufg.strProjekt || "Allgemein"}\\n`;
+                desc += `Status: Offen\\n`;
+                desc += `Quelle: ${strTitel}`;
+                icsContent.push("DESCRIPTION:" + desc);
+
+                icsContent.push("PRIORITY:5"); // Mittlere Priorität
+                icsContent.push("STATUS:NEEDS-ACTION");
+                icsContent.push("PERCENT-COMPLETE:0");
+                
+                if (aufg.strKategorie) {
+                    icsContent.push("CATEGORIES:" + aufg.strKategorie);
+                }
+
+                icsContent.push("END:VTODO");
+            });
+
+            icsContent.push("END:VCALENDAR");
+
+            // Datei-Download Logik
+            const blob = new Blob([icsContent.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Aufgaben_${name.replace(/\s/g, "_")}.ics`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+        
         // ==========================================
         // FUNKTIONEN: Projektverwaltung
         // ==========================================
@@ -6363,35 +6418,17 @@
             // ==========================================
             // Die gleiche Sortier-Logik wie beim PDF
             // ==========================================
-            aktuellePunkte.sort((a, b) => {
-                const getGewicht = (typ) => {
-                    if (!typ) return 4;
-                    let t = typ.toLowerCase();
-                    if (t.includes('info')) return 1;
-                    if (t.includes('entscheidung')) return 2;
-                    if (t.includes('aufgabe')) return 3;
-                    return 4;
-                };
-
-                let gewichtA = getGewicht(a.strTyp);
-                let gewichtB = getGewicht(b.strTyp);
-
-                if (gewichtA !== gewichtB) {
-                    return gewichtA - gewichtB;
-                }
-                
-                return b.intBesprechungspunktnummer - a.intBesprechungspunktnummer;
-            });
 
             if(aktuellePunkte.length > 0) {
                 htmlProtokollInhalt += `<h3>Aktuelle Punkte</h3>`;
-                htmlProtokollInhalt += `<table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; border: 1px solid #ddd; font-family: Arial, sans-serif;">`;
+                // border="0" und border-collapse sorgen für eine saubere Single-Line-Optik
+                htmlProtokollInhalt += `<table border="0" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; border: 1px solid #000; font-family: Arial, sans-serif;">`;
                 
-                // NEU: Das platzsparende 3-Spalten-Design
-                htmlProtokollInhalt += `<tr style="background-color: #0056b3; color: white; text-align: left;">
-                                    <th width="25%">Besprechungspunkt</th>
-                                    <th width="55%">Beschreibung</th>
-                                    <th width="20%">Name und Termin</th>
+                // Kopfzeile mit dezentem Grau und klarem Rahmen
+                htmlProtokollInhalt += `<tr style="background-color: #f2f2f2; color: #000; text-align: left;">
+                                    <th width="25%" style="border: 1px solid #000;">Besprechungspunkt</th>
+                                    <th width="55%" style="border: 1px solid #000;">Beschreibung</th>
+                                    <th width="20%" style="border: 1px solid #000;">Name und Termin</th>
                                   </tr>`;
                 
                 aktuellePunkte.forEach(punkt => {
@@ -6403,7 +6440,7 @@
                     if (punkt.strKategorie) extraInfos.push(`Kat: ${punkt.strKategorie}`);
                     if (punkt.strProjekt) extraInfos.push(`Proj: ${punkt.strProjekt}`);
                     if (extraInfos.length > 0) {
-                        colPunkt += `<br><span style="font-size: 0.85em; color: #555;">${extraInfos.join(' | ')}</span>`;
+                        colPunkt += `<br><span style="font-size: 0.85em; color: #000;">${extraInfos.join(' | ')}</span>`;
                     }
 
                     // Spalte 2: Beschreibung
@@ -6429,10 +6466,11 @@
                     
                     if (colWerWann === "") colWerWann = "-";
 
+                    // Wichtig: Auch die <td> brauchen den border-style, damit das Gitter einheitlich schwarz ist
                     htmlProtokollInhalt += `<tr>
-                        <td valign="top">${colPunkt}</td>
-                        <td valign="top">${colBeschr}</td>
-                        <td valign="top">${colWerWann}</td>
+                        <td valign="top" style="border: 1px solid #000;">${colPunkt}</td>
+                        <td valign="top" style="border: 1px solid #000;">${colBeschr}</td>
+                        <td valign="top" style="border: 1px solid #000;">${colWerWann}</td>
                     </tr>`;
                 });
                 htmlProtokollInhalt += `</table>`;
