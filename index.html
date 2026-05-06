@@ -4712,66 +4712,63 @@
                 alert("Kopieren fehlgeschlagen.");
             });
         }
-
         function generiereKalenderDatei(name, aufgabenListe) {
+            // Zeitstempel im Format YYYYMMDDTHHMMSSZ
             const jetzt = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-            let icsContent = [
+            
+            // Header - Wichtig: Keine Leerzeichen vor den Zeilen!
+            let icsLines = [
                 "BEGIN:VCALENDAR",
                 "VERSION:2.0",
                 "PRODID:-//Gemini Meetingtool//DE",
-                "CALSCALE:GREGORIAN",
-                "METHOD:PUBLISH"
+                "METHOD:PUBLISH",
+                "X-WR-CALNAME:Meeting Aufgaben"
             ];
 
             aufgabenListe.forEach(aufg => {
-                const uuid = "aufgabe-" + aufg.intBesprechungspunktnummer + "-" + Math.random().toString(36).substr(2, 9) + "@meetingtool.local";
+                const uuid = "meeting-task-" + aufg.intBesprechungspunktnummer + "-" + Date.now() + "@tool.local";
                 
-                // Zieldatum für DUE (Fälligkeit) und DTSTART (Start)
-                let dueDateRaw = aufg.datZieldatum ? aufg.datZieldatum.replace(/-/g, "") : "";
+                // Zieldatum bestimmen: Entweder das Datum vom Protokoll oder "morgen"
+                let d = aufg.datZieldatum ? new Date(aufg.datZieldatum) : new Date();
+                if(!aufg.datZieldatum) d.setDate(d.getDate() + 1);
                 
-                icsContent.push("BEGIN:VTODO");
-                icsContent.push("UID:" + uuid);
-                icsContent.push("DTSTAMP:" + jetzt);
-                icsContent.push("DTSTART;VALUE=DATE:" + (dueDateRaw || jetzt.split("T")[0])); // Startet heute oder am Zieldatum
-                
-                if (dueDateRaw) {
-                    icsContent.push("DUE;VALUE=DATE:" + dueDateRaw);
-                }
+                const dateStr = d.toISOString().replace(/-/g, "").split("T")[0];
 
-                // Projekt in den Titel aufnehmen, damit es sofort sichtbar ist
-                const projektTag = aufg.strProjekt ? `[${aufg.strProjekt}] ` : "";
-                icsContent.push("SUMMARY:" + projektTag + aufg.strBeschreibung);
+                icsLines.push("BEGIN:VEVENT");
+                icsLines.push("UID:" + uuid);
+                icsLines.push("DTSTAMP:" + jetzt);
+                // Ganztägiger Termin
+                icsLines.push("DTSTART;VALUE=DATE:" + dateStr);
+                icsLines.push("DTEND;VALUE=DATE:" + dateStr);
                 
-                // Beschreibung mit Umbrüchen (\n) säubern
-                let desc = `Projekt: ${aufg.strProjekt || "Allgemein"}\\n`;
-                desc += `Status: Offen\\n`;
-                desc += `Quelle: ${strTitel}`;
-                icsContent.push("DESCRIPTION:" + desc);
-
-                icsContent.push("PRIORITY:5"); // Mittlere Priorität
-                icsContent.push("STATUS:NEEDS-ACTION");
-                icsContent.push("PERCENT-COMPLETE:0");
+                // Titel: [Projekt] Beschreibung
+                const summary = (aufg.strProjekt ? `[${aufg.strProjekt}] ` : "") + aufg.strBeschreibung;
+                icsLines.push("SUMMARY:" + summary.replace(/[,;]/g, "\\$1"));
                 
-                if (aufg.strKategorie) {
-                    icsContent.push("CATEGORIES:" + aufg.strKategorie);
-                }
-
-                icsContent.push("END:VTODO");
+                // Beschreibung
+                let desc = `Zuständig: ${name}\\n`;
+                desc += `Projekt: ${aufg.strProjekt || "Allgemein"}\\n`;
+                desc += `Meeting: ${strTitel}`;
+                icsLines.push("DESCRIPTION:" + desc.replace(/[,;]/g, "\\$1"));
+                
+                icsLines.push("TRANSP:TRANSPARENT"); // Macht den Kalender nicht "belegt"
+                icsLines.push("END:VEVENT");
             });
 
-            icsContent.push("END:VCALENDAR");
+            icsLines.push("END:VCALENDAR");
 
-            // Datei-Download Logik
-            const blob = new Blob([icsContent.join("\r\n")], { type: "text/calendar;charset=utf-8" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `Aufgaben_${name.replace(/\s/g, "_")}.ics`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }
+            // WICHTIG: Der Inhalt muss mit CRLF (\r\n) getrennt sein, sonst verweigert Outlook den Dienst
+            const icsString = icsLines.join("\r\n");
+
+            const blob = new Blob([icsString], { type: "text/calendar;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `Aufgaben_${name.replace(/\s/g, "_")}.ics`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }    
         
         // ==========================================
         // FUNKTIONEN: Projektverwaltung
