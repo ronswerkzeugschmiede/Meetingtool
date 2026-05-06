@@ -4100,9 +4100,10 @@
 
         // Wandelt z.B. 101 in "1.01" oder 1205 in "12.05" um
         function formatierePunktNummer(intNummer) {
-            let intHauptNr = Math.floor(intNummer / 100);
-            // padStart füllt mit '0' auf, falls die Zahl kleiner als 10 ist (aus 5 wird '05')
-            let strUnterNr = String(intNummer % 100).padStart(2, '0'); 
+            let num = Number(intNummer);
+            let intHauptNr = Math.floor(num / 100);
+            // Holt den Rest (die letzten zwei Stellen) und füllt ggf. mit 0 auf
+            let strUnterNr = String(num % 100).padStart(2, '0'); 
             return intHauptNr + "." + strUnterNr;
         }
 
@@ -4713,53 +4714,60 @@
             });
         }
         function generiereKalenderDatei(name, aufgabenListe) {
-            // Zeitstempel im Format YYYYMMDDTHHMMSSZ
             const jetzt = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
             
-            // Header - Wichtig: Keine Leerzeichen vor den Zeilen!
             let icsLines = [
                 "BEGIN:VCALENDAR",
                 "VERSION:2.0",
                 "PRODID:-//Gemini Meetingtool//DE",
-                "METHOD:PUBLISH",
-                "X-WR-CALNAME:Meeting Aufgaben"
+                "METHOD:PUBLISH"
             ];
 
             aufgabenListe.forEach(aufg => {
                 const uuid = "meeting-task-" + aufg.intBesprechungspunktnummer + "-" + Date.now() + "@tool.local";
                 
-                // Zieldatum bestimmen: Entweder das Datum vom Protokoll oder "morgen"
-                let d = aufg.datZieldatum ? new Date(aufg.datZieldatum) : new Date();
-                if(!aufg.datZieldatum) d.setDate(d.getDate() + 1);
+                // --- DATUMS-LOGIK ---
+                // Startdatum = Zieldatum
+                let dStart = aufg.datZieldatum ? new Date(aufg.datZieldatum) : new Date();
+                const dateStartStr = dStart.toISOString().replace(/-/g, "").split("T")[0];
+
+                // Enddatum = Zieldatum + 1 Tag (damit es im Kalender korrekt als EIN Tag angezeigt wird)
+                let dEnd = new Date(dStart);
+                dEnd.setDate(dEnd.getDate() + 1);
+                const dateEndStr = dEnd.toISOString().replace(/-/g, "").split("T")[0];
+
+                // --- TITEL-LOGIK ---
+                // Beschreibung auf 20 Zeichen kürzen
+                let kurzBeschreibung = aufg.strBeschreibung || "";
+                if (kurzBeschreibung.length > 20) {
+                    kurzBeschreibung = kurzBeschreibung.substring(0, 17) + "...";
+                }
+                const summary = `ToDo-${kurzBeschreibung}`;
+
+                // --- NOTIZ-LOGIK ---
+                const besprDatum = new Date(aufg.datErfassungsdatum).toLocaleDateString('de-DE');
+                const zielDatumSichtbar = aufg.datZieldatum ? new Date(aufg.datZieldatum).toLocaleDateString('de-DE') : "-";
+                const formatierteNr = formatierePunktNummer(aufg.intBesprechungspunktnummer);
+                let desc = `${strTitel} [${formatierteNr}] vom ${besprDatum}\\n`;
                 
-                const dateStr = d.toISOString().replace(/-/g, "").split("T")[0];
+                desc += `Zuständig: ${name}\\n`;
+                desc += `Zieltermin: ${zielDatumSichtbar}\\n`;
+                desc += `${aufg.strBeschreibung.replace(/\n/g, "\\n")}`; // Originalbeschreibung (mit Umbrüchen)
 
                 icsLines.push("BEGIN:VEVENT");
                 icsLines.push("UID:" + uuid);
                 icsLines.push("DTSTAMP:" + jetzt);
-                // Ganztägiger Termin
-                icsLines.push("DTSTART;VALUE=DATE:" + dateStr);
-                icsLines.push("DTEND;VALUE=DATE:" + dateStr);
-                
-                // Titel: [Projekt] Beschreibung
-                const summary = (aufg.strProjekt ? `[${aufg.strProjekt}] ` : "") + aufg.strBeschreibung;
+                icsLines.push("DTSTART;VALUE=DATE:" + dateStartStr);
+                icsLines.push("DTEND;VALUE=DATE:" + dateEndStr);
                 icsLines.push("SUMMARY:" + summary.replace(/[,;]/g, "\\$1"));
-                
-                // Beschreibung
-                let desc = `Zuständig: ${name}\\n`;
-                desc += `Projekt: ${aufg.strProjekt || "Allgemein"}\\n`;
-                desc += `Meeting: ${strTitel}`;
                 icsLines.push("DESCRIPTION:" + desc.replace(/[,;]/g, "\\$1"));
-                
-                icsLines.push("TRANSP:TRANSPARENT"); // Macht den Kalender nicht "belegt"
+                icsLines.push("TRANSP:TRANSPARENT");
                 icsLines.push("END:VEVENT");
             });
 
             icsLines.push("END:VCALENDAR");
 
-            // WICHTIG: Der Inhalt muss mit CRLF (\r\n) getrennt sein, sonst verweigert Outlook den Dienst
             const icsString = icsLines.join("\r\n");
-
             const blob = new Blob([icsString], { type: "text/calendar;charset=utf-8" });
             const link = document.createElement("a");
             link.href = window.URL.createObjectURL(blob);
@@ -4768,8 +4776,8 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }    
-        
+        }
+                
         // ==========================================
         // FUNKTIONEN: Projektverwaltung
         // ==========================================
