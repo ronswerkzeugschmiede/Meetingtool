@@ -1506,7 +1506,7 @@
                             <label style="display: block; margin-bottom: 5px;">Erledigt / am: <span id="termin-status-emoji">🟢</span></label>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <input type="checkbox" id="check-erledigt" onchange="toggleErledigt(); aktualisiereTerminWarnung();" style="margin: 0; width: 22px; height: 22px; cursor: pointer;">
-                                <input type="date" id="input-erledigt-datum" onchange="syncErledigtCheckbox(); aktualisiereTerminWarnung();" style="margin-bottom: 0; flex-grow: 1;">
+                                <input type="date" id="input-erledigt-datum" onchange="toggleErledigt(); aktualisiereTerminWarnung();" style="margin-bottom: 0; flex-grow: 1;">
                             </div>
                         </div>
                     </div>
@@ -1652,7 +1652,7 @@
         // ==========================================
         // KONSTANTEN
         // ==========================================
-        const strDateiversion = "0.53";
+        const strDateiversion = "0.54";
         const strAutor = "Ronald Richter";
         const strInfotext = "Hier steht die Programminfo. Dieses Tool dient der Vorbereitung und Durchführung von von Besprechungsserien.";
         const arrTypen = ["Agenda", "Info", "Aufgabe", "Entscheidung"];
@@ -4123,6 +4123,7 @@
                 // Wenn Haken entfernt wird, Datum löschen
                 dateInput.value = "";
             }
+            aktualisiereTerminWarnung();
         }
 
         function aktualisiereTerminWarnung() {
@@ -4189,11 +4190,6 @@
             element.classList.remove('termin-ok', 'termin-warnung', 'termin-gefahr');
         }
 
-        function setzeTerminFarbe(element, status) {
-            if (status) element.classList.add('termin-' + status);
-        }     
-
-
         function prüfeTypAuswahl() {
             // ... dein bestehender Code ...
             if (typ === "Aufgabe") {
@@ -4210,15 +4206,6 @@
             if (status === "ok") element.classList.add('termin-ok');
             if (status === "warnung") element.classList.add('termin-warnung');
             if (status === "gefahr") element.classList.add('termin-gefahr');
-        }
-
-        // Wird aufgerufen, wenn man das Datum manuell ändert (oder ein Punkt geladen wird)
-        function syncErledigtCheckbox() {
-            const cb = document.getElementById('check-erledigt');
-            const dateInput = document.getElementById('input-erledigt-datum');
-            
-            // Wenn etwas im Datumsfeld steht, mache einen Haken, sonst nimm ihn weg
-            cb.checked = dateInput.value !== "";
         }
 
         // Zeigt/Versteckt Aufgabendetails je nach gewähltem Typ und setzt Zieldatum
@@ -5362,8 +5349,9 @@
             // Versteckt oder zeigt den Aufgabenbereich, falls es eine Aufgabe ist
             prüfeTypAuswahl();
             
-            // NEU: Setzt den Haken der Checkbox richtig, je nachdem ob ein Erledigt-Datum vorhanden ist
-            syncErledigtCheckbox();
+            // Setzt den Haken der Checkbox richtig, je nachdem ob ein Erledigt-Datum vorhanden ist
+            toggleErledigt();
+            aktualisiereTerminWarnung();
 
             // Prüfen, ob wir im Multiprojekt-Modus sind
             if (strAktuellerModus === "Multiprojekt") {
@@ -7792,9 +7780,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
-        
-
-
+    
         function importiereJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
