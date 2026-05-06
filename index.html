@@ -1652,7 +1652,7 @@
         // ==========================================
         // KONSTANTEN
         // ==========================================
-        const strDateiversion = "0.54";
+        const strDateiversion = "0.55";
         const strAutor = "Ronald Richter";
         const strInfotext = "Hier steht die Programminfo. Dieses Tool dient der Vorbereitung und Durchführung von von Besprechungsserien.";
         const arrTypen = ["Agenda", "Info", "Aufgabe", "Entscheidung"];
@@ -4739,8 +4739,8 @@
                 // --- TITEL-LOGIK ---
                 // Beschreibung auf 20 Zeichen kürzen
                 let kurzBeschreibung = aufg.strBeschreibung || "";
-                if (kurzBeschreibung.length > 20) {
-                    kurzBeschreibung = kurzBeschreibung.substring(0, 17) + "...";
+                if (kurzBeschreibung.length > 40) {
+                    kurzBeschreibung = kurzBeschreibung.substring(0, 37) + "...";
                 }
                 const summary = `ToDo-${kurzBeschreibung}`;
 
