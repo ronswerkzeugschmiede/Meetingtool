@@ -1506,7 +1506,7 @@
                             <label style="display: block; margin-bottom: 5px;">Erledigt / am: <span id="termin-status-emoji">🟢</span></label>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <input type="checkbox" id="check-erledigt" onchange="toggleErledigt(); aktualisiereTerminWarnung();" style="margin: 0; width: 22px; height: 22px; cursor: pointer;">
-                                <input type="date" id="input-erledigt-datum" onchange="toggleErledigt(); aktualisiereTerminWarnung();" style="margin-bottom: 0; flex-grow: 1;">
+                                <input type="date" id="input-erledigt-datum" onchange="setzeCheckboxErledigtStatusNachEintrag(); aktualisiereTerminWarnung();" style="margin-bottom: 0; flex-grow: 1;">
                             </div>
                         </div>
                     </div>
@@ -1657,6 +1657,11 @@
         const strInfotext = "Hier steht die Programminfo. Dieses Tool dient der Vorbereitung und Durchführung von von Besprechungsserien.";
         const arrTypen = ["Agenda", "Info", "Aufgabe", "Entscheidung"];
         const arrWiederholungen = ["täglich", "wöchentlich", "14-tägig", "monatlich", "zweimonatlich", "vierteljährlich", "halbjährlich", "jährlich"];
+        
+        // ==========================================
+        // VARIABLEN (Entwicklermodus)
+        // ==========================================
+        let bolDevmode = true
 
         // ==========================================
         // VARIABLEN (Allgemeine Einstellungen)
@@ -1867,6 +1872,9 @@
             const btnHome = document.getElementById('btn-home');
             if (btnHome) {
                 btnHome.style.display = (ansichtId === 'view-startmenue') ? 'none' : 'block';
+            }
+            if (bolDevmode) {
+                console.log("Ansicht gewechselt")
             }
         }
 
@@ -2129,14 +2137,16 @@
             if (arrAlleReihen[index] !== undefined && arrAlleReihen[index] !== null) {
                 intAktiverReihenIndex = index;
                 const paket = arrAlleReihen[index];
-                
-                console.log("Lade Datenpaket für Index " + index, paket); // Debug-Hilfe
-                
+                if (bolDevmode) {
+                    console.log("Lade Datenpaket für Index " + index, paket); // Debug-Hilfe
+                }
                 verteileAlleDaten(paket); 
                 
                 // UI Refresh erzwingen
                 document.getElementById('ui-titel').innerText = strTitel;
-                console.log("Erfolgreich gewechselt zu: " + strTitel);
+                if (bolDevmode) {
+                    console.log("Erfolgreich gewechselt zu: " + strTitel);
+                }
             } else {
                 console.error("Fehler: Keine Daten an Index " + index + " gefunden! (undefined)");
                 alert("Besprechungsreihe konnte nicht geladen werden.");
@@ -2191,8 +2201,9 @@
                     
                     // Sofort speichern, damit es beim nächsten Laden da ist
                     if (typeof speichereStammdaten === "function") speichereStammdaten();
-                    
-                    console.log("Logo erkannt und global gespeichert.");
+                    if (bolDevmode) {
+                        console.log("Logo erkannt und global gespeichert.");
+                    }
                 } else {
                     console.error("Die Datei scheint kein gültiges Bild-Format zu sein.");
                 }
@@ -2253,7 +2264,7 @@
             const zeigeInaktive = document.getElementById('check-zeige-inaktive') ? document.getElementById('check-zeige-inaktive').checked : false;
             
             // ==========================================
-            // NEU: Suchbegriff für den Live-Filter auslesen
+            // Suchbegriff für den Live-Filter auslesen
             // ==========================================
             const suchFeld = document.getElementById('input-liste-suche');
             const suchBegriff = suchFeld ? suchFeld.value.toLowerCase().trim() : "";
@@ -2307,7 +2318,7 @@
                 if (punkt.strBeschreibung.length > 900) vorschau += "...";
 
                 // ==========================================
-                // NEU: DEINE eigene Funktion nutzen!
+                // DEINE eigene Funktion nutzen!
                 // ==========================================
                 vorschau = formatiereHashtags(vorschau);
 
@@ -2324,14 +2335,17 @@
                     const emoji = holeTerminEmoji(relevantesZiel);
                     zusatzInfos.push(`🎯 Ziel: ${formatiereDatum(relevantesZiel)} ${emoji}`);
                 }
-                console.log("Datum gewählt: " + relevantesZiel);
+
+                if (bolDevmode) {
+                    console.log("Datum gewählt: " + relevantesZiel);
+                }
 
                 if (punkt.datErledigungsdatum) zusatzInfos.push(`✅ Erledigt: ${formatiereDatum(punkt.datErledigungsdatum)}`);                
 
                 let contentDiv = document.createElement('div');
                 contentDiv.style.flexGrow = "1";
                 contentDiv.style.marginRight = "15px";
-                // NEU: Keine festen Farben mehr! 'opacity' regelt die Abstufungen perfekt für Light- & Darkmode.
+                // Keine festen Farben mehr! 'opacity' regelt die Abstufungen perfekt für Light- & Darkmode.
                 contentDiv.innerHTML = `
                     <div style="font-weight: bold; margin-bottom: 5px; font-size: 1.1em;">
                         ${formatierePunktNummer(punkt.intBesprechungspunktnummer)} - [${punkt.strTyp}]
@@ -3734,8 +3748,9 @@
         }
 
         function speichereHistorieUI() {
-            console.log("Speichervorgang der Historie gestartet...");
-
+            if (bolDevmode) {
+                console.log("Speichervorgang der Historie gestartet...");
+            }
             if (!arrAnwesenheitsHistorie) {
                 console.error("Fehler: arrAnwesenheitsHistorie ist nicht definiert.");
                 return;
@@ -3770,8 +3785,9 @@
 
             // 4. In Datenbank schreiben
             speichereDatenInDB();
-
-            alert("Historie erfolgreich aktualisiert.");
+            if (bolDevmode) {
+                console.log("Historie erfolgreich aktualisiert.");
+            }
             wechsleAnsicht('view-startmenue');
         }
 
@@ -4125,6 +4141,17 @@
                 dateInput.value = "";
             }
             aktualisiereTerminWarnung();
+
+            if (bolDevmode) {
+                console.log ("toggleErledigt aufgerufen");
+            }
+        }
+
+        // Setzt im Aufgaben Erledigungsstatus-Feld den Haken rein, wenn ein Datum drinsteht 
+        function setzeCheckboxErledigtStatusNachEintrag() {
+            const cb = document.getElementById('check-erledigt');
+            const dateInput = document.getElementById('input-erledigt-datum');            
+            cb.checked = (dateInput.value !== "");
         }
 
         function aktualisiereTerminWarnung() {
@@ -4417,7 +4444,6 @@
                 speichereDatenInDB(); 
             }
         }
-
 
         function bereiteEinladungsTextVor(index) {
             let terminDatumString = arrNaechsteTermine[index];
@@ -5124,8 +5150,9 @@
             if (typeof ladeStammdatenInUI === "function") {
                 ladeStammdatenInUI();
             }
-            
-            console.log("Agenda erfolgreich gespeichert!");
+            if (bolDevmode) {
+                console.log("Agenda gespeichert!");
+            }
         }
         
 
@@ -5410,7 +5437,7 @@
             prüfeTypAuswahl();
             
             // Setzt den Haken der Checkbox richtig, je nachdem ob ein Erledigt-Datum vorhanden ist
-            toggleErledigt();
+            setzeCheckboxErledigtStatusNachEintrag();
             aktualisiereTerminWarnung();
 
             // Prüfen, ob wir im Multiprojekt-Modus sind
@@ -5423,6 +5450,10 @@
             }
             // Aktualisiert die rechte Sidebar mit der neuen Markierung
             aktualisiereSidebar();
+
+            if (bolDevmode) {
+                console.log ("Punkt " + intAktBesprPunktNr + " geladen");
+            }
         }
 
         // Speichert die Eingaben aus der UI in unserem Array und in der Datenbank
@@ -5726,11 +5757,11 @@
 
             // 6. Optisch zur Anwesenheitsliste wechseln
             wechsleAnsicht('view-anwesenheit');
-            //console.log ("Protokollführer: " + protokollfuehrerReinerName)
-            //console.log (strAktBesprechungsort)
 
-            //console.log("Meeting erfolgreich gestartet. Ansicht gewechselt zu Anwesenheit.");
-            //console.groupEnd();
+            if (bolDevmode) {
+                console.log ("Protokollführer: " + protokollfuehrerReinerName)
+                console.log ("Besprechungsort: " + strAktBesprechungsort)
+            }
         }
 
         // ==========================================
@@ -7412,7 +7443,9 @@
             // Wird aufgerufen, wenn die DB erfolgreich bereit ist
             request.onsuccess = function(event) {
                 db = event.target.result;
-                console.log("Datenbank erfolgreich verbunden.");
+                if (bolDevmode) {
+                    console.log("Datenbank verbunden.") 
+                }
                 // Direkt nach dem Verbinden laden wir die alten Daten
                 ladeDatenAusDB();
             };
@@ -7608,9 +7641,11 @@
 
             // 4. In die DB schreiben (überschreibt das alte Paket)
             const request = store.put(masterPaket);
-
-            request.onsuccess = () => console.log("Alle Reihen gespeichert.");
+            if (bolDevmode) {
+                request.onsuccess = () => console.log("Alle Reihen gespeichert.");
+            }
             request.onerror = (e) => console.error("Speicherfehler:", e.target.error);
+            
         }
         
         function ladeDatenAusDB() {
@@ -7936,6 +7971,12 @@
 
             // Logo anzeigen
             aktualisiereLogoDisplay()
+
+            // Console wenn Entwicklermodus
+            if (bolDevmode) {
+                console.log("Tool gestartet") 
+            }
+            
         };        
     </script>
 </body>
