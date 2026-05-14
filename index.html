@@ -1202,7 +1202,7 @@
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Besprechungs-Rhythmus:</label>
-                    <select id="select-wiederholung" onchange="aktualisiereTerminVorschau()" style="width: 100%;"></select>
+                    <select id="select-wiederholung" onchange="naechstenTerminNauNeuenRythmus()" style="width: 100%;"></select>
                 </div>
             </div>
 
@@ -1676,6 +1676,7 @@
         let bolEntscheidungenImmerMitschicken = false; // Historische Entscheidungen immer anhängen?
         let strWiederholung = "wöchentlich"; // Gewähltes Intervall
         let intWiederholungTage = 7; // Anzahl der Tage zwischen Besprechungen
+        let datNaechsteBesprechung = ""; // Globaler Speicher für das nächste Datum (Format YYYY-MM-DD)
         let strBetreffzeilentext = "Protokoll Jour Fixe"; // Betreff für E-Mails
         let strOrgaName = "Firma GmbH";
         let strOrgaAdresse = "Musterstraße 1, 12345 Musterstadt";
@@ -1809,9 +1810,9 @@
         // ==========================================
         // VARIABLEN TEXT-VORLAGEN
         // ==========================================
-        let strTplEinladung = "Hallo zusammen,\n\nhiermit lade ich euch zu unserer nächsten Besprechung \"{Titel}\" ein.\n\nDatum: {Datum}\nZeit: {Startzeit} - {Endzeit} Uhr\nOrt: {Ort}\n\n{Agenda}\n\nBitte gebt kurz Bescheid, falls ihr nicht teilnehmen könnt.\n\nViele Grüße";
-        let strTplErinnerung = "Hallo {Empfaenger},\n\nhier ist eine kurze Erinnerung an deine offenen Aufgaben aus unserer Besprechung \"{Titel}\":\n\n{Aufgaben}\n\nBitte gib mir ein kurzes Update oder hake die Punkte im nächsten Termin ab. Danke dir!\n\nViele Grüße";
-        let strTplProtokoll = "Hallo zusammen,\n\nhier ist das aktuelle Protokoll unserer Serie \"{Titel}\" vom {Datum}, {Startzeit} - {Endzeit} Uhr.\n\n{Protokoll}\n\nBitte um Rückmeldung, wenn etwas geändert oder ergänzt werden soll.\nDie nächste Besprechung findet am {NaechstesDatum} statt.\n\nViele Grüße";
+        let strTplEinladung = "{Gruss} zusammen,\n\nhiermit lade ich euch zu unserer nächsten Besprechung \"{Titel}\" ein.\n\nDatum: {Datum}\nZeit: {Startzeit} - {Endzeit} Uhr\nOrt: {Ort}\n\n{Agenda}\n\nBitte gebt kurz Bescheid, falls ihr nicht teilnehmen könnt.\n\nViele Grüße";
+        let strTplErinnerung = "{Gruss} {Empfaenger},\n\nhier ist eine kurze Erinnerung an deine offenen Aufgaben aus unserer Besprechung \"{Titel}\":\n\n{Aufgaben}\n\nBitte gib mir ein kurzes Update oder hake die Punkte im nächsten Termin ab. Danke dir!\n\nViele Grüße";
+        let strTplProtokoll = "{Gruss} zusammen,\n\nhier ist das aktuelle Protokoll unserer Serie \"{Titel}\" vom {Datum}, {Startzeit} - {Endzeit} Uhr.\n\n{Protokoll}\n\nBitte um Rückmeldung, wenn etwas geändert oder ergänzt werden soll.\nDie nächste Besprechung findet am {NaechstesDatum} statt.\n\nViele Grüße";
         
         // Merkt sich, in welches Feld man zuletzt geklickt hat (für die Platzhalter-Buttons)
         let letztesFeldVorlagen = "input-tpl-einladung";
@@ -1976,6 +1977,7 @@
             bolEntscheidungenImmerMitschicken = false;
             strWiederholung = "wöchentlich";
             intWiederholungTage = 7;
+            datNaechsteBesprechung = new Date + 7
             strBetreffzeilentext = "Protokoll " + name;
             strOrgaName = "Firma GmbH"
             strOrgaAdresse = "Musterstraße 1, 12345 Musterstadt";
@@ -4355,13 +4357,43 @@
             const tag = String(datum.getDate()).padStart(2, '0');
             return `${jahr}-${monat}-${tag}`;
         }
+        
+        function naechstenTerminNauNeuenRythmus() {
+            // 1. Den neuen Wert aus dem Select-Feld in die globale Variable schreiben
+            strWiederholung = document.getElementById('select-wiederholung').value;
+
+            // 2. Termine basierend auf dem neuen Rhythmus komplett neu berechnen
+            // Wir nehmen das aktuelle Datum (oder das Datum der letzten Besprechung) als Basis
+            berechneInitialeTermine();
+
+            // 3. Den ersten neu berechneten Termin als "nächste Besprechung" setzen
+            if (arrNaechsteTermine.length > 0) {
+                datNaechsteBesprechung = arrNaechsteTermine[0];
+            }
+
+            // 4. Die Anzeige aktualisieren
+            aktualisiereTermineUI();
+
+            // 5. Daten dauerhaft speichern
+            if (typeof speichereDatenInDB === "function") {
+                speichereDatenInDB();
+            }
+            if (bolDevmode) {
+                console.log("Rhythmus angepasst auf:", strWiederholung);
+            }
+        }
 
         function aktualisiereTermineUI() {
+            if (arrNaechsteTermine.length > 0) {
+                datNaechsteBesprechung = arrNaechsteTermine[0];
+            }
             const container = document.getElementById('liste-termine-ui');
             container.innerHTML = "";
 
             arrNaechsteTermine.forEach((terminString, index) => {
                 let terminDatum = new Date(terminString);
+                let optionen = { weekday: 'long', day: '2-digit', month: 'long' };
+                let anzeigeDatum = terminDatum.toLocaleDateString('de-DE', optionen);
                 let warnungen = [];
 
                 if (bolOhneWochenenden && istWochenende(terminDatum)) warnungen.push("Wochenende");
@@ -4379,30 +4411,39 @@
                 zeilenDiv.style.border = warnungen.length > 0 ? "1px solid #ffeeba" : "1px solid #ccc";
                 zeilenDiv.style.borderRadius = "4px";
 
-                // Eingabefeld für das Datum
+                // --- ÄNDERUNG 1: MEHR PLATZ FÜR DAS LABEL ---
+                let labelSpan = document.createElement('span');
+                labelSpan.style.width = "300px"; // Breite erhöht
+                labelSpan.style.minWidth = "300px"; // Verhindert Zusammendrücken
+                labelSpan.style.fontWeight = "bold";
+                labelSpan.style.lineHeight = "1.2";
+                // Erzeugt die Optik aus deinem Screenshot (Nummer oben, Datum unten)
+                labelSpan.innerHTML = `${index + 1}. Termin:<br>${anzeigeDatum}`;
+
+                // --- ÄNDERUNG 2: DATUMSFELD VERKLEINERN ---
                 let dateInput = document.createElement('input');
                 dateInput.type = "date";
                 dateInput.value = terminString;
-                dateInput.style.margin = "0 15px 0 0";
+                dateInput.style.width = "150px"; // Feste, schmale Breite
+                dateInput.style.padding = "5px";
+                dateInput.style.margin = "0 20px 0 0";
                 dateInput.onchange = (e) => terminGeaendert(index, e.target.value);
 
                 // Info-Text (Warnungen)
                 let infoSpan = document.createElement('span');
                 infoSpan.style.flexGrow = "1";
                 if (warnungen.length > 0) {
-                    infoSpan.innerHTML = `⚠️ <b style="color: red;">Konflikt: ${warnungen.join(', ')}</b>`;
+                    infoSpan.innerHTML = `⚠️ <b style="color: red;">${warnungen.join(', ')}</b>`;
                 } else {
-                    infoSpan.innerHTML = `✅ OK`;
+                    infoSpan.innerHTML = `<span style="color: green;">✅ OK</span>`;
                 }
 
-                // Einladungs-Button
+                // Buttons
                 let btnEinladen = document.createElement('button');
                 btnEinladen.innerText = "✉️ Einladung senden";
-                btnEinladen.style.margin = "0";
                 btnEinladen.style.padding = "5px 10px";
                 btnEinladen.onclick = () => generiereEinladung(index);
 
-                // Hier ist der sauber definierte Kopieren-Button
                 let btnKopieren = document.createElement('button');
                 btnKopieren.innerText = "📋 Text kopieren";
                 btnKopieren.style.margin = "0 0 0 10px";
@@ -4410,9 +4451,10 @@
                 btnKopieren.style.background = "#17a2b8";
                 btnKopieren.style.color = "white";
                 btnKopieren.style.border = "none";
+                btnKopieren.style.borderRadius = "3px";
                 btnKopieren.onclick = () => kopiereEinladungsText(index);                
 
-                zeilenDiv.appendChild(document.createTextNode(`${index + 1}. Termin: `));
+                zeilenDiv.appendChild(labelSpan);
                 zeilenDiv.appendChild(dateInput);
                 zeilenDiv.appendChild(infoSpan);
                 zeilenDiv.appendChild(btnEinladen);
@@ -4439,6 +4481,7 @@
             }
             
             // 3. UI sofort aktualisieren und Daten sichern
+            datNaechsteBesprechung = arrNaechsteTermine[0];
             aktualisiereTermineUI(); 
             if (typeof speichereDatenInDB === "function") {
                 speichereDatenInDB(); 
@@ -6228,62 +6271,118 @@
         function tageszeitabhaengigerGruss() {
             const stunde = new Date().getHours();
             if (stunde < 11) return "Guten Morgen";
-            if (stunde >= 11 && stunde < 18) return "Hallo";
-            return "Guten Abend";
+            if (stunde >= 11 && stunde < 17) return "Hallo";
+            return "Guten Abend";            
         }
-
-        function besprechungsprotokollTextErzeugen() {
-            ladeOderSichereAnwesenheit();
+        
+        function besprechungsprotokollTextErzeugen(intBesprNrZuDrucken) {
+            if (bolDevmode) {
+                console.log("Suche Besprechung Nr:", intBesprNrZuDrucken); 
+            }  
             
-            // 1. Grunddaten sammeln
-            const gruss = tageszeitabhaengigerGruss();
-            const gewaehlterOrtName = strAktBesprechungsort
-            let ortObj = arrBesprOrte.find(o => o.strName === gewaehlterOrtName);
-            let ort = gewaehlterOrtName;
+            const zielNr = intBesprNrZuDrucken || intAktBesprNr;
+            let historienEintrag = arrAnwesenheitsHistorie.find(h => Number(h.intBesprNr) === Number(zielNr));
 
-            if (ortObj && ortObj.strLinkOderAdresse) {
-                if (ortObj.bolOnline && ortObj.strLinkOderAdresse.startsWith("http")) {
-                    let originalLink = ortObj.strLinkOderAdresse;
-                    
-                    // 1. https:// oder http:// entfernen
-                    let anzeigeText = originalLink.replace(/^https?:\/\//, '');
-                    
-                    // 2. Nach dem ersten verbleibenden "/" suchen
-                    let slashIndex = anzeigeText.indexOf('/');
-                    
-                    // 3. Wenn ein "/" gefunden wurde UND der Teil davor kurz genug ist (< 32 Zeichen)
-                    if (slashIndex !== -1 && slashIndex < 32) {
-                        anzeigeText = anzeigeText.substring(0, slashIndex);
-                    } 
-                    // 4. Falls kein Slash da ist oder der Hostname allein schon zu lang wäre, 
-                    // kürzen wir trotzdem bei 32 Zeichen für die Optik
-                    else if (anzeigeText.length > 32) {
-                        anzeigeText = anzeigeText.substring(0, 32) + "...";
-                    }
+            let anwesendeListe, abwesendeListe, gewaehlterOrtName, protokollantName;
 
-                    ort += ` (Besprechungslink auf <a href="${originalLink}">${anzeigeText}</a>)`;
-                } else {
-                    ort += ` (${ortObj.strLinkOderAdresse})`;
-                }
+            if (historienEintrag) {
+                // DATEN AUS DER HISTORIE (Archiv-Modus)
+                anwesendeListe = historienEintrag.arrAnwesende || [];
+                abwesendeListe = historienEintrag.arrAbwesende || [];
+                gewaehlterOrtName = historienEintrag.strOrt || "";
+                protokollantName = historienEintrag.strProtokollant || "";
+            } else {
+                // DATEN AUS DEM LIVE-FORMULAR (Aktuelle Sitzung)
+                // Wir müssen hier die Daten ERST aus der UI ziehen, falls sie dort gerade eingetippt wurden
+                ladeOderSichereAnwesenheit(); 
+                
+                anwesendeListe = typeof arrAnwesende !== 'undefined' ? arrAnwesende : [];
+                abwesendeListe = typeof arrAbwesende !== 'undefined' ? arrAbwesende : [];
+                gewaehlterOrtName = strAktBesprechungsort;
+                protokollantName = strNameAktuellerProtokollant;
             }
-                                    
-            // Datum formatieren
-            const inputDatum = document.getElementById('input-datum').value;
-            const besprDatum = inputDatum ? inputDatum.split('-').reverse().join('.') : "Heute";
-            const besprZeit = document.getElementById('input-uhrzeit').value || "00:00";
-            const besprEndZeit = document.getElementById('input-endzeit').value || "00:00"; 
+                
+            if (bolDevmode) {
+                console.log("Drucke Besprechung Nr:", zielNr, "Ort:", gewaehlterOrtName); 
+            }    
+            
+            // 2. Datum und Zeit festlegen
+            let besprDatum, besprZeit, besprEndZeit;
+
+            if (historienEintrag) {
+                // Daten aus dem Historien-Objekt (Format dort ist meist YYYY-MM-DD)
+                besprDatum = historienEintrag.strDatum.split('-').reverse().join('.');
+                besprZeit = historienEintrag.datIstStartZeit || "00:00";
+                besprEndZeit = historienEintrag.datIstEndeZeit || "00:00";
+                if (bolDevmode) {
+                    console.log("Historische Besprechung vom " + besprDatum + " gefunden."); 
+                }    
+            } else {
+                // Daten aus den UI-Feldern
+                const inputDatum = document.getElementById('input-datum').value;
+                besprDatum = inputDatum ? inputDatum.split('-').reverse().join('.') : "Heute";
+                besprZeit = document.getElementById('input-uhrzeit').value || "00:00";
+                besprEndZeit = document.getElementById('input-endzeit').value || "00:00";
+                if (bolDevmode) {
+                    console.log("Historische Besprechung nicht gefunden. Daten aus Besprechung vom " + besprDatum + " verwendet."); 
+                } 
+            }
 
             let strNaechstesDatum = "Noch nicht geplant";
-            if (arrNaechsteTermine.length > 0) {
-                let d = new Date(arrNaechsteTermine[0]);
-                strNaechstesDatum = d.toLocaleDateString('de-DE');
+            if (datNaechsteBesprechung) {
+                let d = new Date(datNaechsteBesprechung);
+                strNaechstesDatum = d.toLocaleDateString('de-DE', { 
+                    weekday: 'long', 
+                    day: '2-digit', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
             }
 
-            // 2. Punkte filtern und SORTIEREN
-            let aktuellePunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true);
+            // 3. Besprechungspunkte filtern
+            let aktuellePunkte = arrProtokollDaten.filter(p => {
+                const punktBesprNr = Math.floor(p.intBesprechungspunktnummer / 100) * 100;
+                
+                // --- Vorbereitungen für Datumsvergleiche ---
+                const referenzDatumStr = historienEintrag ? historienEintrag.strDatum : new Date().toISOString().split('T')[0];
+                const referenzDatum = new Date(referenzDatumStr);
+                const erfassungsDatum = p.datErfassungsdatum ? new Date(p.datErfassungsdatum) : new Date(0);
+
+                // Datum der VORHERIGEN Besprechung finden
+                // Wir sortieren die Historie absteigend und suchen den ersten Eintrag, der kleiner ist als unsere zielNr
+                let vorherigeBespr = arrAnwesenheitsHistorie
+                    .filter(h => h.intBesprNr < zielNr)
+                    .sort((a, b) => b.intBesprNr - a.intBesprNr)[0];
+                
+                // Falls es keine vorherige Besprechung gibt, nehmen wir ein sehr altes Datum
+                const datumLetzteBespr = vorherigeBespr ? new Date(vorherigeBespr.strDatum) : new Date(0);
+
+                // --- REGEL-CHECK ---
+
+                // Regel A: Punkt wurde genau in dieser Besprechung erstellt
+                if (punktBesprNr === zielNr) return true;
+
+                // Regel B: Punkt ist älter als die aktuelle Sitzung
+                if (punktBesprNr < zielNr) {
+                    
+                    // 1. War er zum Zeitpunkt des Meetings noch offen?
+                    const erledigtDatum = p.datErledigungsdatum ? new Date(p.datErledigungsdatum) : null;
+                    const warDamalsOffen = (!erledigtDatum || erledigtDatum > referenzDatum);
+
+                    // 2. NEU: Wurde er erst NACH der letzten Besprechung angelegt? 
+                    // (Wichtig für Punkte, die zwischendurch entstanden und schnell erledigt wurden)
+                    const istGanzNeuZwischendurch = (erfassungsDatum > datumLetzteBespr);
+
+                    // Der Punkt wird angezeigt, wenn er damals offen war ODER wenn er brandneu ist 
+                    // UND er grundsätzlich für die Anzeige markiert ist
+                    return (warDamalsOffen || istGanzNeuZwischendurch) && p.bolAktuellAnzeigen;
+                }
+                
+                return false; 
+            });          
 
             // ==========================================
-            // NEU: Die gleiche Sortier-Logik wie beim PDF
+            // Die gleiche Sortier-Logik wie beim PDF
             // ==========================================
             aktuellePunkte.sort((a, b) => {
                 const getGewicht = (typ) => {
@@ -6350,17 +6449,18 @@
             });            
 
             // 4. Text zusammenbauen
-            let protokollInhalt = `Ort: ${ort}\n`;
-            protokollInhalt += `Anwesend: ${arrAnwesende.length > 0 ? arrAnwesende.join(', ') : '-'}\n`;
+            let protokollInhalt = `Ort: ${gewaehlterOrtName}\n`;
+            protokollInhalt += `Protokollführer: ${protokollantName}\n`;
+            protokollInhalt += `Anwesend: ${anwesendeListe.length > 0 ? anwesendeListe.join(', ') : '-'}\n`;
             
-            // Verteiler hinzufügen (Abwesende + Mitleser)
+            // Verteiler hinzufügen (Abwesende aus Phase 1 + Mitleser)
             let arrNamenMitleser = arrStilleMitleser.map(m => m.strVorname + " " + m.strNachname);
-            let arrVerteiler = arrAbwesende.concat(arrNamenMitleser);
+            let arrVerteiler = abwesendeListe.concat(arrNamenMitleser);
             protokollInhalt += `Verteiler: ${arrVerteiler.length > 0 ? arrVerteiler.join(', ') : '-'}\n\n`;
             
             protokollInhalt += `--- AKTUELLE PUNKTE ---\n\n${strPunkte}`;
-
-            let protokollText = ersetzePlatzhalter(strTplProtokoll, besprDatum, ort, "", "", "", protokollInhalt, strNaechstesDatum);
+            
+            let protokollText = ersetzePlatzhalter(strTplProtokoll, besprDatum, gewaehlterOrtName, "", "", "", protokollInhalt, strNaechstesDatum);
             
             if (strEntscheidungen !== "") {
                 protokollText += `--- ENTSCHEIDUNGEN ---\n\n${strEntscheidungen}\n`;
@@ -6375,31 +6475,42 @@
             });
         }
 
+        function besprechungsprotokollMailErzeugen(intBesprNrZuDrucken) {
+            // 1a. Bestimmen der Ziel-Nummer und Suche in Historie
+            const zielNr = intBesprNrZuDrucken || intAktBesprNr;
+            let historienEintrag = arrAnwesenheitsHistorie.find(h => Number(h.intBesprNr) === Number(zielNr));
 
+            // 1b. Datenquellen festlegen (Historie vs. Live)
+            let anwesendeListe, abwesendeListe, gewaehlterOrtName;
+            if (historienEintrag) {
+                anwesendeListe = historienEintrag.arrAnwesende || [];
+                abwesendeListe = historienEintrag.arrAbwesende || [];
+                gewaehlterOrtName = historienEintrag.strOrt || "";
+            } else {
+                ladeOderSichereAnwesenheit();
+                anwesendeListe = typeof arrAnwesende !== 'undefined' ? arrAnwesende : [];
+                abwesendeListe = typeof arrAbwesende !== 'undefined' ? arrAbwesende : [];
+                gewaehlterOrtName = strAktBesprechungsort;
+            }
 
-        function besprechungsprotokollMailErzeugen() {
-            ladeOderSichereAnwesenheit();
-            
-            // 1. E-Mail Adressen und Namen ermitteln
+            // 1c. E-Mail Adressen basierend auf den ermittelten Listen filtern
             let anwesendeEmails = arrListeAktiveTeilnehmer
-                .filter(t => arrAnwesende.includes(t.strVorname + " " + t.strNachname))
+                .filter(t => anwesendeListe.includes(t.strVorname + " " + t.strNachname))
                 .map(t => t.strEmail).filter(e => e);
 
             let abwesendeEmails = arrListeAktiveTeilnehmer
-                .filter(t => arrAbwesende.includes(t.strVorname + " " + t.strNachname))
+                .filter(t => abwesendeListe.includes(t.strVorname + " " + t.strNachname))
                 .map(t => t.strEmail).filter(e => e);
 
             let mitleserEmails = arrStilleMitleser.map(m => m.strEmail).filter(e => e);
             let ccEmails = abwesendeEmails.concat(mitleserEmails);
 
             let arrNamenMitleser = arrStilleMitleser.map(m => m.strVorname + " " + m.strNachname);
-            let arrVerteiler = arrAbwesende.concat(arrNamenMitleser);
+            let arrVerteiler = abwesendeListe.concat(arrNamenMitleser);
             let strVerteiler = arrVerteiler.length > 0 ? arrVerteiler.join(', ') : '-';
-            let strAnwesende = arrAnwesende.length > 0 ? arrAnwesende.join(', ') : '-';
+            let strAnwesende = anwesendeListe.length > 0 ? anwesendeListe.join(', ') : '-';
 
             // 2. Grunddaten sammeln
-            const gruss = tageszeitabhaengigerGruss();
-            const gewaehlterOrtName = strAktBesprechungsort
             let ortObj = arrBesprOrte.find(o => o.strName === gewaehlterOrtName);
             let ort = gewaehlterOrtName;
 
@@ -6436,20 +6547,44 @@
             const besprEndZeit = document.getElementById('input-endzeit').value || "00:00";
 
             let strNaechstesDatum = "Noch nicht geplant";
-            if (arrNaechsteTermine.length > 0) {
-                let d = new Date(arrNaechsteTermine[0]);
-                strNaechstesDatum = d.toLocaleDateString('de-DE');
+            if (datNaechsteBesprechung) {
+                let d = new Date(datNaechsteBesprechung);
+                strNaechstesDatum = d.toLocaleDateString('de-DE', { 
+                    weekday: 'long', 
+                    day: '2-digit', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
             }
 
             // 3. HTML-Protokoll Inhalt zusammenbauen (für den {Protokoll} Platzhalter)
             let htmlProtokollInhalt = `<p style="line-height: 1.5;">`;
-            htmlProtokollInhalt += `<b>Ort:</b> ${ort}<br>`;
+            htmlProtokollInhalt += `<b>Ort:</b> ${gewaehlterOrtName}<br>`;
             htmlProtokollInhalt += `<b>Anwesend:</b> ${strAnwesende}<br>`;
             htmlProtokollInhalt += `<b>Verteiler:</b> ${strVerteiler}`;
             htmlProtokollInhalt += `</p>`;
             
-            // Liste der Punkte holen
-            let aktuellePunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true);
+            // Liste der Punkte mit Historien-Logik filtern
+            let aktuellePunkte = arrProtokollDaten.filter(p => {
+                const punktBesprNr = Math.floor(p.intBesprechungspunktnummer / 100) * 100;
+                const referenzDatumStr = historienEintrag ? historienEintrag.strDatum : new Date().toISOString().split('T')[0];
+                const referenzDatum = new Date(referenzDatumStr);
+                const erfassungsDatum = p.datErfassungsdatum ? new Date(p.datErfassungsdatum) : new Date(0);
+
+                let vorherigeBespr = arrAnwesenheitsHistorie
+                    .filter(h => h.intBesprNr < zielNr)
+                    .sort((a, b) => b.intBesprNr - a.intBesprNr)[0];
+                const datumLetzteBespr = vorherigeBespr ? new Date(vorherigeBespr.strDatum) : new Date(0);
+
+                if (punktBesprNr === zielNr) return true;
+                if (punktBesprNr < zielNr) {
+                    const erledigtDatum = p.datErledigungsdatum ? new Date(p.datErledigungsdatum) : null;
+                    const warDamalsOffen = (!erledigtDatum || erledigtDatum > referenzDatum);
+                    const istGanzNeuZwischendurch = (erfassungsDatum > datumLetzteBespr);
+                    return (warDamalsOffen || istGanzNeuZwischendurch) && p.bolAktuellAnzeigen;
+                }
+                return false; 
+            });
 
             // ==========================================
             // Die gleiche Sortier-Logik wie beim PDF
@@ -6529,7 +6664,7 @@
 
             // Jetzt die Vorlage nutzen
             let templateHtml = strTplProtokoll.replace(/\n/g, '<br>');
-            let htmlMailBody = ersetzePlatzhalter(templateHtml, besprDatum, ort, "", "", "", htmlProtokollInhalt, strNaechstesDatum, true);
+            let htmlMailBody = ersetzePlatzhalter(templateHtml, besprDatum, gewaehlterOrtName, "", "", "", htmlProtokollInhalt, strNaechstesDatum, true);
             let htmlProtokoll = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">${htmlMailBody}</div>`;
             
             // 4. Als echtes HTML in die Zwischenablage kopieren
@@ -6552,29 +6687,37 @@
             });
         }
 
-        function besprechungsprotokollPDFErzeugen() {
-            ladeOderSichereAnwesenheit();
-            
-            // 1. Daten und Teilnehmer sammeln
-            let anwesendeEmails = arrListeAktiveTeilnehmer.filter(t => arrAnwesende.includes(t.strVorname + " " + t.strNachname));
-            let abwesendeEmails = arrListeAktiveTeilnehmer.filter(t => arrAbwesende.includes(t.strVorname + " " + t.strNachname));
-            
-            let strAnwesende = arrAnwesende.length > 0 ? arrAnwesende.join(', ') : '-';
-            let arrNamenMitleser = arrStilleMitleser.map(m => m.strVorname + " " + m.strNachname);
-            let arrVerteiler = arrAbwesende.concat(arrNamenMitleser);
-            let strVerteiler = arrVerteiler.length > 0 ? arrVerteiler.join(', ') : '-';
+        function besprechungsprotokollPDFErzeugen(intBesprNrZuDrucken) {
+            const zielNr = intBesprNrZuDrucken || intAktBesprNr;
+            let historienEintrag = arrAnwesenheitsHistorie.find(h => Number(h.intBesprNr) === Number(zielNr));
 
-            const ort = strAktBesprechungsort
-            const inputDatum = document.getElementById('input-datum').value;
-            const besprDatum = inputDatum ? inputDatum.split('-').reverse().join('.') : "Heute";
-            const besprZeit = document.getElementById('input-uhrzeit').value || "00:00";
-            const besprEndZeit = document.getElementById('input-endzeit').value || "00:00";
-            
-            let strNaechstesDatum = "Noch nicht geplant";
-            if (arrNaechsteTermine.length > 0) {
-                let d = new Date(arrNaechsteTermine[0]);
-                strNaechstesDatum = d.toLocaleDateString('de-DE');
+            let anwesendeListe, abwesendeListe, gewaehlterOrtName, protokollantName;
+            let besprDatum, besprZeit, besprEndZeit;
+
+            if (historienEintrag) {
+                anwesendeListe = historienEintrag.arrAnwesende || [];
+                abwesendeListe = historienEintrag.arrAbwesende || [];
+                gewaehlterOrtName = historienEintrag.strOrt || "";
+                protokollantName = historienEintrag.strProtokollant || "";
+                besprDatum = historienEintrag.strDatum.split('-').reverse().join('.');
+                besprZeit = historienEintrag.datIstStartZeit || "00:00";
+                besprEndZeit = historienEintrag.datIstEndeZeit || "00:00";
+            } else {
+                ladeOderSichereAnwesenheit();
+                anwesendeListe = typeof arrAnwesende !== 'undefined' ? arrAnwesende : [];
+                abwesendeListe = typeof arrAbwesende !== 'undefined' ? arrAbwesende : [];
+                gewaehlterOrtName = strAktBesprechungsort;
+                protokollantName = strNameAktuellerProtokollant;
+                const inputDatum = document.getElementById('input-datum').value;
+                besprDatum = inputDatum ? inputDatum.split('-').reverse().join('.') : "Heute";
+                besprZeit = document.getElementById('input-uhrzeit').value || "00:00";
+                besprEndZeit = document.getElementById('input-endzeit').value || "00:00";
             }
+
+            let strAnwesende = anwesendeListe.length > 0 ? anwesendeListe.join(', ') : '-';
+            let arrNamenMitleser = arrStilleMitleser.map(m => m.strVorname + " " + m.strNachname);
+            let arrVerteiler = abwesendeListe.concat(arrNamenMitleser);
+            let strVerteiler = arrVerteiler.length > 0 ? arrVerteiler.join(', ') : '-';
 
             // 2. Das Design für das PDF aufbauen (DIN A4 optimiert)
             let pdfHTML = `<div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4;">`;
@@ -6602,7 +6745,7 @@
                     <td width="15%"><b>Datum:</b></td>
                     <td width="35%">${besprDatum}, ${besprZeit} - ${besprEndZeit} Uhr</td>
                     <td width="15%"><b>Ort:</b></td>
-                    <td width="35%">${ort}</td>
+                    <td width="35%">${gewaehlterOrtName}</td>
                 </tr>
                 <tr>
                     <td><b>Protokoll:</b></td>
@@ -6619,11 +6762,30 @@
             </table>`;
 
 
-            // Liste der aktuellen Punkte filtern
-            let aktuellePunkte = arrProtokollDaten.filter(p => p.bolAktuellAnzeigen === true);
+            // Liste der Punkte mit Historien-Logik filtern
+            let aktuellePunkte = arrProtokollDaten.filter(p => {
+                const punktBesprNr = Math.floor(p.intBesprechungspunktnummer / 100) * 100;
+                const referenzDatumStr = historienEintrag ? historienEintrag.strDatum : new Date().toISOString().split('T')[0];
+                const referenzDatum = new Date(referenzDatumStr);
+                const erfassungsDatum = p.datErfassungsdatum ? new Date(p.datErfassungsdatum) : new Date(0);
+
+                let vorherigeBespr = arrAnwesenheitsHistorie
+                    .filter(h => h.intBesprNr < zielNr)
+                    .sort((a, b) => b.intBesprNr - a.intBesprNr)[0];
+                const datumLetzteBespr = vorherigeBespr ? new Date(vorherigeBespr.strDatum) : new Date(0);
+
+                if (punktBesprNr === zielNr) return true;
+                if (punktBesprNr < zielNr) {
+                    const erledigtDatum = p.datErledigungsdatum ? new Date(p.datErledigungsdatum) : null;
+                    const warDamalsOffen = (!erledigtDatum || erledigtDatum > referenzDatum);
+                    const istGanzNeuZwischendurch = (erfassungsDatum > datumLetzteBespr);
+                    return (warDamalsOffen || istGanzNeuZwischendurch) && p.bolAktuellAnzeigen;
+                }
+                return false; 
+            });
             
             // ==========================================
-            // NEU: Sortier-Logik (Gruppieren & Neueste zuerst)
+            // Sortier-Logik (Gruppieren & Neueste zuerst)
             // ==========================================
             aktuellePunkte.sort((a, b) => {
                 // Hilfsfunktion: Gibt jedem Typ eine "Wichtigkeit"
@@ -6716,6 +6878,17 @@
                     });
                     pdfHTML += `</ul>`;
                 }
+            }
+
+            let strNaechstesDatum = "Noch nicht geplant";
+            if (datNaechsteBesprechung) {
+                let d = new Date(datNaechsteBesprechung);
+                strNaechstesDatum = d.toLocaleDateString('de-DE', { 
+                    weekday: 'long', 
+                    day: '2-digit', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
             }
 
             // Fußzeile
@@ -7470,6 +7643,7 @@
                 bolEntscheidungenImmerMitschicken: bolEntscheidungenImmerMitschicken,
                 strWiederholung: strWiederholung,
                 intWiederholungTage: intWiederholungTage,
+                datNaechsteBesprechung: datNaechsteBesprechung,
                 floatStandardStundensatz: floatStandardStundensatz,
                 strBetreffzeilentext: strBetreffzeilentext,
                 // 2. Laufzeit
@@ -7532,7 +7706,8 @@
             if (paket.bolEntscheidungenImmerMitschicken !== undefined) bolEntscheidungenImmerMitschicken = paket.bolEntscheidungenImmerMitschicken;
             if (paket.strWiederholung !== undefined) strWiederholung = paket.strWiederholung;
             if (paket.intWiederholungTage !== undefined) intWiederholungTage = paket.intWiederholungTage;
-            
+            if (paket.datNaechsteBesprechung !== undefined) datNaechsteBesprechung = paket.datNaechsteBesprechung;
+
             if (paket.strBetreffzeilentext !== undefined) strBetreffzeilentext = paket.strBetreffzeilentext;
             
             if (paket.intAktBesprNr !== undefined) intAktBesprNr = paket.intAktBesprNr;
