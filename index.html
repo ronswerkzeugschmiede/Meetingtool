@@ -1419,41 +1419,40 @@
             <span>Besprechungspunkt: <span id="ui-akt-punkt">101</span></span>
         </h2>
 
-        <div style="background: #0056b3; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; color: white; padding: 10px 15px;">
-                <div style="font-size: 1.1em;">
-                    ⏱️ Dauer: <span id="ui-meeting-dauer" style="font-weight: bold; font-size: 1.2em; font-family: monospace;">00:00:00</span>
-                </div>
-                
-                <div id="ui-pause-bereich" style="display: none; color: #ffeb3b; text-align: center; line-height: 1.2;">
-                    ☕ Weiter um <span id="ui-pause-ende" style="font-weight: bold; font-size: 1.2em;">--:--</span> Uhr<br>
-                    <span id="ui-pause-countdown" style="font-size: 1.3em; font-weight: bold; font-family: monospace;">00:00</span> verbleibend
-                </div>
-                
-                <div>
-                    <button id="btn-pause-starten" onclick="startePause()" style="margin: 0; background: #ffc107; color: black; border: none; font-weight: bold; border-radius: 4px;">☕ Pause</button>
-                    <button id="btn-pause-beenden" onclick="beendePause()" style="margin: 0; background: #28a745; color: white; border: none; font-weight: bold; border-radius: 4px; display: none;">▶️ Fortsetzen</button>
-                </div>
-            </div>
-
-            <div style="height: 6px; background: rgba(255, 255, 255, 0.2); width: 100%;">
-                <div id="ui-pausen-balken" style="height: 100%; width: 0%; background: #28a745; transition: width 1s linear, background-color 1s ease;"></div>
-            </div>
-        </div>
-
-               
-        <div style="display: flex; gap: 20px; align-items: flex-start; position: relative;">
+        <div style="display: flex; gap: 25px; align-items: flex-start; position: relative; width: 100%;">
             
-            <div id="haupt-eingabe-bereich" style="flex-grow: 1; min-width: 0; transition: all 0.3s ease;">
+            <div id="haupt-eingabe-bereich" style="flex: 1; width: 50%; min-width: 0; transition: all 0.3s ease;">
+                
+                <div style="background: #0056b3; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; color: white; padding: 10px 15px;">
+                        <div style="font-size: 1.1em;">
+                            ⏱️ Dauer: <span id="ui-meeting-dauer" style="font-weight: bold; font-size: 1.2em; font-family: monospace;">00:00:00</span>
+                        </div>
+                        
+                        <div id="ui-pause-bereich" style="display: none; color: #ffeb3b; text-align: center; line-height: 1.2;">
+                            ☕ Weiter um <span id="ui-pause-ende" style="font-weight: bold; font-size: 1.2em;">--:--</span> Uhr<br>
+                            <span id="ui-pause-countdown" style="font-size: 1.3em; font-weight: bold; font-family: monospace;">00:00</span> verbleibend
+                        </div>
+                        
+                        <div>
+                            <button id="btn-pause-starten" onclick="startePause()" style="margin: 0; background: #ffc107; color: black; border: none; font-weight: bold; border-radius: 4px; padding: 5px 10px;">☕ Pause</button>
+                            <button id="btn-pause-beenden" onclick="beendePause()" style="margin: 0; background: #28a745; color: white; border: none; font-weight: bold; border-radius: 4px; display: none; padding: 5px 10px;">▶️ Fortsetzen</button>
+                        </div>
+                    </div>
+
+                    <div style="height: 6px; background: rgba(255, 255, 255, 0.2); width: 100%;">
+                        <div id="ui-pausen-balken" style="height: 100%; width: 0%; background: #28a745; transition: width 1s linear, background-color 1s ease;"></div>
+                    </div>
+                </div>
                 
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                     <div style="flex: 1;">
                         <label style="font-weight: bold; display: block; margin-bottom: 5px;">Typ:</label>
-                        <select id="select-typ" onchange="prüfeTypAuswahl()" style="margin-bottom: 0;"></select>
+                        <select id="select-typ" onchange="prüfeTypAuswahl()" style="margin-bottom: 0; width: 100%;"></select>
                     </div>
                     <div style="flex: 1;">
                         <label style="font-weight: bold; display: block; margin-bottom: 5px;">Kategorie:</label>
-                        <select id="select-kategorie" style="margin-bottom: 0;"></select>
+                        <select id="select-kategorie" style="margin-bottom: 0; width: 100%;"></select>
                     </div>
                 </div>        
 
@@ -1464,44 +1463,28 @@
                         <button onclick="aendereTextfeldGroesse(2)" style="padding: 2px 8px; margin: 0 0 0 5px; font-size: 0.9em; cursor: pointer; border-radius: 4px;" title="Schrift vergrößern">A+</button>
                     </div>
                 </div>
-                <textarea id="input-beschreibung" rows="8" style="width: 100%; font-size: 18px;" spellcheck="true" lang="de-DE" oninput="ueberwacheTexteingabe(event)"></textarea>
-                <div style="font-size: 0.85em; color: #555; margin-top: 0; padding: 2px 0 0 0; background-color: transparent; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                    <span style="opacity: 0.8;"><b>Schnelleingabe zum Einfügen</b></span>
-                    <span> (+ Leertaste) </span>
-                    <span style="color: #ccc;">|</span>
-                    
-                    <span style="color: #0056b3;"><b>##</b> Kat/Projekt</span>
-                    <span style="color: #ccc;">|</span>
-                    <span style="color: #0056b3;"><b>###</b> BesprPunkt Verweis</span>
-                    <span style="color: #ccc;">|</span>
-                    
-                    <span style="color: #28a745;"><b>++</b> Orga/Funktion</span>
-                    <span style="color: #ccc;">|</span>
-                    <span style="color: #28a745;"><b>+++</b> Person</span>
-                    <span style="color: #ccc;">|</span>
-                    <span style="color: #fd7e14;"><b>++++</b> Alle Namen einer Gruppe</span>
-                    <span style="color: #ccc;">|</span>
-                    
+                <textarea id="input-beschreibung" rows="6" style="width: 100%; font-size: 18px;" spellcheck="true" lang="de-DE" oninput="ueberwacheTexteingabe(event)"></textarea>
+                
+                <div style="font-size: 0.8em; color: #555; margin-top: 2px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; opacity: 0.9;">
+                    <span><b>Schnelleingabe:</b></span>
+                    <span style="color: #0056b3;"><b>##</b> Kat/Projekt</span> |
+                    <span style="color: #0056b3;"><b>###</b> Ref</span> |
+                    <span style="color: #28a745;"><b>++</b> Funktion</span> |
+                    <span style="color: #28a745;"><b>+++</b> Person</span> |
+                    <span style="color: #28a745;"><b>++++</b> Gruppe</span> |
                     <span style="color: #666;"><b>@@</b> Datum</span>
-                    
-                    <span style="color: #ccc;">|</span>
-                    <span style="color: #0056b3;"><b>#</b> Hashtags werden unterstützt</span>
-
                 </div>
 
                 <div id="bereich-aufgabe" style="display: none; background: #f8f9fa; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
                     <div style="display: flex; gap: 15px; align-items: flex-end;">
-                        
                         <div style="flex: 1;">
                             <label style="display: block; margin-bottom: 5px;">Zieldatum:</label>
                             <input type="date" id="input-zieldatum" onchange="aktualisiereTerminWarnung()" style="margin-bottom: 0; width: 100%;">
                         </div>
-                        
                         <div style="flex: 1;">
                             <label style="display: block; margin-bottom: 5px;">Akt. Zieldatum:</label>
                             <input type="date" id="input-akt-zieldatum" onchange="aktualisiereTerminWarnung()" style="margin-bottom: 0; width: 100%;">
                         </div>
-
                         <div style="flex: 1;">
                             <label style="display: block; margin-bottom: 5px;">Erledigt / am: <span id="termin-status-emoji">🟢</span></label>
                             <div style="display: flex; align-items: center; gap: 10px;">
@@ -1521,42 +1504,47 @@
                 </div>
                 
                 <label style="font-weight: bold; display: block; margin-bottom: 5px;">Verantwortlich / Name:</label>
-                <select id="select-name"></select>
+                <select id="select-name" style="width: 100%;"></select>
 
                 <br><br>
 
-                <div style="padding-top: 10px; border-top: 1px solid #ddd;">
+                <div style="padding-top: 10px; border-top: 1px solid #ddd; display: flex; flex-wrap: wrap; gap: 8px;">
                     <button id="btn-vorheriger" onclick="navigierePunkt(-1)">&laquo; Zurück</button>
                     <button id="btn-naechster" onclick="navigierePunkt(1)">Weiter &raquo;</button>
                     <button onclick="textUpdateEinfuegen()">Update Datum einfügen</button>
-                    
                     <button onclick="geheZurListeUndSpeichere()">Liste (Aktuelle Punkte)</button>
-                    
-                    <button id="btn-beende-besprechung" onclick="pruefeNachzuegler()" style="background: #dc3545; color: white; border: none;">Beende laufende Besprechung</button>
+                    <button id="btn-beende-besprechung" onclick="pruefeNachzuegler()" style="background: #dc3545; color: white; border: none;">Beende Besprechung</button>
                 </div>
             </div>
-            <div id="sidebar-live-agenda" style="width: 300px; flex-shrink: 0; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; transition: all 0.3s ease;">
+
+            <div id="sidebar-live-agenda" style="flex: 1; width: 50%; flex-shrink: 0; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; transition: all 0.3s ease; height: 660px; display: flex; flex-direction: column;">
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1em;">📋 Agenda:</h3>
-                    <button onclick="toggleSidebar()" style="margin: 0; padding: 2px 8px; font-size: 0.8em; background: #6c757d; color: white; border: none; cursor: pointer;">Einklappen ✖</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 12px; flex-shrink: 0;">
+                    <h3 style="margin: 0; font-size: 1.2em; color: #0056b3;">📋 Live-Agenda Übersicht</h3>
+                    <button onclick="toggleSidebar()" style="margin: 0; padding: 3px 10px; font-size: 0.85em; background: #6c757d; color: white; border: none; cursor: pointer; border-radius: 3px;">Einklappen ✖</button>
                 </div>
 
-                <div id="ui-sidebar-offene-aufgaben" style="margin-bottom: 20px;">
-                    <strong style="color: #dc3545; font-size: 0.9em;">Aufgaben aus den letzten Besprechungen</strong>
-                    <ul id="liste-sidebar-aufgaben" style="list-style: none; padding-left: 0; margin-top: 5px; font-size: 0.9em;"></ul>
-                </div>
+                <div style="flex-grow: 1; overflow-y: auto; padding-right: 5px;">
+                    
+                    <div id="ui-sidebar-offene-aufgaben" style="margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 4px; border-left: 4px solid #dc3545; box-shadow: 0 1px 3px rgba(0,0,0,0.05);max-height: 250px; overflow-y: auto;">
+                        <strong style="color: #dc3545; font-size: 0.95em; display: block; margin-bottom: 8px; border-bottom: 1px dashed #ffdee2; padding-bottom: 3px;">💬✔️ Heute besprochen</strong>
+                        <ul id="liste-sidebar-aufgaben" style="list-style: none; padding-left: 0; margin: 0; font-size: 0.9em; opacity: 0.75;"></ul>
+                    </div>
 
-                <div id="ui-sidebar-heutige-agenda">
-                    <strong style="color: #0056b3; font-size: 0.9em;">Aktuelle Besprechungspunkte</strong>
-                    <ul id="liste-sidebar-agenda" style="list-style: none; padding-left: 0; margin-top: 5px; font-size: 0.9em;"></ul>
-                </div>
+                    <div id="ui-sidebar-heutige-agenda" style="background: #fff; padding: 10px; border-radius: 4px; border-left: 4px solid #0056b3; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <strong style="color: #0056b3; font-size: 0.95em; display: block; margin-bottom: 8px; border-bottom: 1px dashed #deebff; padding-bottom: 3px;">💭🎯 Nächste Punkte (Agenda)</strong>
+                        <ul id="liste-sidebar-agenda" style="list-style: none; padding-left: 0; margin: 0; font-size: 0.95em;"></ul>
+                    </div>
 
+                </div>
             </div>
-            <button id="btn-sidebar-oeffnen" onclick="toggleSidebar()" style="display: none; position: absolute; right: 0; top: 0; padding: 5px 10px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">⬅ Übersicht</button>
+            
+            <button id="btn-sidebar-oeffnen" onclick="toggleSidebar()" style="display: none; position: absolute; right: 0; top: 0; padding: 5px 10px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">⬅️ Übersicht</button>
 
         </div>
     </div>
+
+   
 
    <div id="box-hash-picker" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 2px solid #0056b3; box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 20px; z-index: 1000; border-radius: 8px; min-width: 300px;">
         <h3 style="margin-top: 0; color: #0056b3;">🏷️ Schnelleingabe: Kategorie / Projekt</h3>
@@ -7078,27 +7066,30 @@
             listAufgaben.innerHTML = "";
             listAgenda.innerHTML = "";
 
-            // Die Hunderter-Nummer dieser Sitzung (z.B. 200)
-            let sitzungsStartNr = Math.floor(intAktBesprPunktNr / 100) * 100;
+            // --- NEU: Wir ermitteln die Hauptnummer (Vorkommastelle) der aktuellen Sitzung (z.B. bei 8.01 ist es 8)
+            let aktuelleSitzungsNummer = Math.floor(intAktBesprPunktNr);
 
             // ==========================================
-            // NEU: Prüfen, ob ein Hashtag-Filter aktiv ist
+            // Prüfen, ob ein Hashtag-Filter aktiv ist
             // ==========================================
             let hatFilter = (typeof strAktiverHashtag !== 'undefined' && strAktiverHashtag !== "");
 
-            // --- 1. ALTE AUFGABEN ---
+            // --- 1. Alte Punkte i.d.R. Aufgaben ---
             let alteAufgaben = arrProtokollDaten.filter(p => {
-                let basisBedingung = p.bolAktuellAnzeigen && p.intBesprechungspunktnummer < sitzungsStartNr && p.strTyp === "Aufgabe";
+                // Jeder Punkt, dessen Hauptnummer kleiner ist als die heutige Sitzung
+                let basisBedingung = p.bolAktuellAnzeigen && Math.floor(p.intBesprechungspunktnummer) < aktuelleSitzungsNummer;
                 if (!basisBedingung) return false;
                 
-                // NEU: Wenn ein Filter aktiv ist, filtern wir die Punkte gnadenlos aus!
                 if (hatFilter) {
                     if (!p.strBeschreibung) return false;
                     let regex = new RegExp("#" + strAktiverHashtag + "\\b", "i");
                     return regex.test(p.strBeschreibung);
                 }
-                return true; // Kein Filter? Alles durchlassen!
+                return true;
             });
+
+            //  Chronologisch aufsteigend sortieren (Kleine Nummern zuerst!)
+            alteAufgaben.sort((a, b) => a.intBesprechungspunktnummer - b.intBesprechungspunktnummer);
 
             // Optischer Hinweis für Aufgaben, wenn gefiltert wird
             if (hatFilter) {
@@ -7109,30 +7100,60 @@
                 let li = document.createElement('li');
                 li.style.marginBottom = "8px";
                 li.style.cursor = "pointer";
+                li.style.padding = "4px";
+                li.style.borderRadius = "4px";
                 li.onclick = () => { speicherePunktAusUI(); ladePunktInUI(p.intBesprechungspunktnummer); }; 
                 
                 let beschr = p.strBeschreibung ? p.strBeschreibung.replace(/\n/g, ' ') : "";
-                if (beschr.length > 35) beschr = beschr.substring(0, 35) + "...";
+                if (beschr.length > 99) beschr = beschr.substring(0, 99) + "...";
                 beschr = formatiereHashtags(beschr);
                 
+                let nrStr = `[${formatierePunktNummer(p.intBesprechungspunktnummer)}]`;
+                
+                // Personen-Tag ermitteln
+                let personTag = p.strName && p.strName.trim() !== "" ? ` <span style="color: #666; font-size: 0.85em; background: #e9ecef; padding: 1px 5px; border-radius: 3px; margin-left: 5px; white-space: nowrap;">👤 ${p.strName}</span>` : "";
+
+                // Flexbox-Layout für saubere Rechtsbündigkeit der Namen
+                li.style.display = "flex";
+                li.style.justifyContent = "space-between";
+                li.style.alignItems = "flex-start";
+
+                // --- DYNAMISCHE ICON- & FARB-ERMITTLUNG ---
+                let icon = "⏳"; // Fallback/Standard für Aufgaben
+                let typ = p.strTyp ? p.strTyp.toLowerCase() : "";
+
+                if (typ.includes("info")) {
+                    icon = "ℹ️";
+                } else if (typ.includes("entscheidung")) {
+                    icon = "🔨";
+                }
+
+                let textInhalt = "";
                 if (p.datErledigungsdatum) {
                     li.style.color = "#a0a0a0"; 
-                    li.style.textDecoration = "line-through";
-                    li.innerHTML = `✔️ [${formatierePunktNummer(p.intBesprechungspunktnummer)}] ${beschr}`;
+                    // Text-Decoration nur auf den Text anwenden, nicht auf das Flex-Layout komplett
+                    textInhalt = `<span style="text-decoration: line-through;">✔️ ${nrStr} ${beschr}</span>`;
                 } else {
                     li.style.color = "#333";
-                    li.innerHTML = `⏳ [${formatierePunktNummer(p.intBesprechungspunktnummer)}] ${beschr}`;
+                    textInhalt = `${icon} ${nrStr} ${beschr}`;
                 }
+
+                // Strukturierter Zusammenbau (Links Text mit Icon, rechts die zuständige Person)
+                li.innerHTML = `
+                    <div style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;">${textInhalt}</div>                   
+                `;
+
                 listAufgaben.appendChild(li);
             });
-            if (alteAufgaben.length === 0) listAufgaben.innerHTML += "<li style='color:gray; font-size:0.9em;'>" + (hatFilter ? "Keine passenden Aufgaben" : "Keine alten Aufgaben") + "</li>";
+
+            if (alteAufgaben.length === 0) listAufgaben.innerHTML += "<li style='color:gray; font-size:0.9em;'>" + (hatFilter ? "Keine passenden Aufgaben" : "Noch keine Punkte") + "</li>";
 
             // --- 2. HEUTIGE AGENDA ---
             let heutigePunkte = arrProtokollDaten.filter(p => {
-                let basisBedingung = p.bolAktuellAnzeigen && p.intBesprechungspunktnummer > sitzungsStartNr;
+                // Punkte, die zur aktuellen Sitzung gehören oder in der Zukunft liegen
+                let basisBedingung = p.bolAktuellAnzeigen && Math.floor(p.intBesprechungspunktnummer) >= aktuelleSitzungsNummer;
                 if (!basisBedingung) return false;
                 
-                // NEU: Hashtag-Filter auch hier anwenden!
                 if (hatFilter) {
                     if (!p.strBeschreibung) return false;
                     let regex = new RegExp("#" + strAktiverHashtag + "\\b", "i");
@@ -7140,6 +7161,9 @@
                 }
                 return true;
             });
+
+            // Chronologisch aufsteigend sortieren (8.01 vor 8.02 vor 13.01!)
+            heutigePunkte.sort((a, b) => a.intBesprechungspunktnummer - b.intBesprechungspunktnummer);
 
             // Optischer Hinweis für Agenda, wenn gefiltert wird
             if (hatFilter) {
@@ -7155,25 +7179,38 @@
                 li.onclick = () => { speicherePunktAusUI(); ladePunktInUI(p.intBesprechungspunktnummer); }; 
 
                 let beschr = p.strBeschreibung ? p.strBeschreibung.replace(/\n/g, ' ') : "";
-                if (beschr.length > 35) beschr = beschr.substring(0, 35) + "...";
+                if (beschr.length > 186) beschr = beschr.substring(0, 186) + "...";
                 beschr = formatiereHashtags(beschr);
                 let nrStr = `[${formatierePunktNummer(p.intBesprechungspunktnummer)}]`;
+
+                // Verantwortlichen anzeigen
+                let personTag = "";
+                if (p.strName && p.strName.trim() !== "") {
+                    // Extrahiert z.B. das Kürzel oder zeigt den vollen Namen dezent an
+                    personTag = ` <span style="color: #666; font-size: 0.85em; background: #e9ecef; padding: 1px 5px; border-radius: 3px; margin-left: 5px;">👤 ${p.strName}</span>`;
+                };
 
                 if (p.intBesprechungspunktnummer === intAktBesprPunktNr) {
                     li.style.fontWeight = "bold";
                     li.style.color = "#0056b3";
                     li.style.background = "#eef2f5";
-                    li.innerHTML = `▶ ${nrStr} ${beschr}`;
+                    li.innerHTML = `▶ ${nrStr} ${personTag} ${beschr}`;
                 } else if (p.strTyp !== "Agenda" || p.datErledigungsdatum) {
                     li.style.color = "#a0a0a0";
-                    li.innerHTML = `✓ ${nrStr} ${beschr}`;
+                    li.innerHTML = `✓ ${nrStr} ${personTag} ${beschr}`;
                 } else {
                     li.style.color = "#333";
-                    li.innerHTML = `📌 ${nrStr} ${beschr}`;
+                    li.innerHTML = `📌 ${nrStr} ${personTag} ${beschr}`;
                 }
                 listAgenda.appendChild(li);
             });
             if (heutigePunkte.length === 0) listAgenda.innerHTML += "<li style='color:gray; font-size:0.9em;'>" + (hatFilter ? "Keine passenden Punkte" : "Keine heutigen Punkte") + "</li>";
+            // Holt den umschließenden Container, der das "max-height" besitzt
+            let containerAufgaben = document.getElementById('ui-sidebar-offene-aufgaben');
+            if (containerAufgaben) {
+                // Scrollt das DIV bis ganz nach unten zum neuesten Eintrag
+                containerAufgaben.scrollTop = containerAufgaben.scrollHeight;
+            }
         }
 
         // ==========================================
